@@ -211,3 +211,49 @@ func TestNewWithCapacityBasic(t *testing.T) {
 		t.Errorf("expected two=2 after delete, got %v (ok=%v)", v, ok)
 	}
 }
+
+func TestMapConvenience(t *testing.T) {
+	m := New[string, int]()
+
+	// 1. Test Len and Has on empty map
+	if m.Len() != 0 {
+		t.Errorf("Expected Len 0, got %d", m.Len())
+	}
+	if m.Has("apple") {
+		t.Error("Empty map should not have 'apple'")
+	}
+
+	// 2. Test Len and Has after additions
+	m.Set("apple", 1)
+	m.Set("banana", 2)
+	if m.Len() != 2 {
+		t.Errorf("Expected Len 2, got %d", m.Len())
+	}
+	if !m.Has("apple") {
+		t.Error("Map should have 'apple'")
+	}
+
+	// 3. Test Len after Delete (The most important part)
+	m.Delete("apple")
+	if m.Len() != 1 {
+		t.Errorf("Expected Len 1 after delete, got %d", m.Len())
+	}
+	if m.Has("apple") {
+		t.Error("Map should not have 'apple' after delete")
+	}
+
+	// 4. Test Clear
+	m.Clear()
+	if m.Len() != 0 {
+		t.Errorf("Expected Len 0 after Clear, got %d", m.Len())
+	}
+	if len(m.slots) != 0 {
+		t.Errorf("Slots should be length 0 after Clear, got %d", len(m.slots))
+	}
+
+	// Verify we can still add things after Clear
+	m.Set("cherry", 3)
+	if m.Len() != 1 || !m.Has("cherry") {
+		t.Error("Map should work correctly after being cleared")
+	}
+}

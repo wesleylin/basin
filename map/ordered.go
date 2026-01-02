@@ -133,3 +133,19 @@ func (m *Map[K, V]) Values() iter.Seq[V] {
 		}
 	}
 }
+
+// Convenience methods
+func (m *Map[K, V]) Len() int {
+	return len(m.table)
+}
+
+func (m *Map[K, V]) Has(key K) bool {
+	_, exists := m.table[key]
+	return exists
+}
+
+func (m *Map[K, V]) Clear() {
+	clear(m.table) // Built-in 'clear' (Go 1.21+) empties the map but keeps memory
+	m.slots = m.slots[:0]
+	m.deletedCount = 0
+}
