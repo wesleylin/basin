@@ -10,8 +10,8 @@ func TestMapBasic(t *testing.T) {
 	fmt.Println("Created new ordered map:", m)
 
 	// 1. setting value
-	m.Set("apple", 1)
-	m.Set("banana", 2)
+	m.Put("apple", 1)
+	m.Put("banana", 2)
 
 	// 2. getting value
 	val, exists := m.Get("apple")
@@ -20,7 +20,7 @@ func TestMapBasic(t *testing.T) {
 	}
 
 	// 3. updating value
-	m.Set("apple", 10)
+	m.Put("apple", 10)
 	val, _ = m.Get("apple")
 	if val != 10 {
 		t.Errorf("Expected updated apple to be 10, got %v", val)
@@ -33,7 +33,7 @@ func TestMapOrder(t *testing.T) {
 	// add items in order
 	keys := []string{"first", "second", "third"}
 	for i, k := range keys {
-		m.Set(k, i)
+		m.Put(k, i)
 	}
 
 	// check same order
@@ -47,7 +47,7 @@ func TestMapOrder(t *testing.T) {
 
 func TestMapAliases(t *testing.T) {
 	m := New[string, int]()
-	m.Set("x", 100)
+	m.Put("x", 100)
 
 	// Test All()
 	for k, v := range m.All() {
@@ -59,8 +59,8 @@ func TestMapAliases(t *testing.T) {
 
 func TestMapKeys(t *testing.T) {
 	m := New[string, int]()
-	m.Set("x", 100)
-	m.Set("y", 200)
+	m.Put("x", 100)
+	m.Put("y", 200)
 
 	// Test Keys()
 	for k := range m.Keys() {
@@ -73,9 +73,9 @@ func TestMapKeys(t *testing.T) {
 
 func TestDeleteOrder(t *testing.T) {
 	m := New[string, int]()
-	m.Set("apple", 1)
-	m.Set("banana", 2)
-	m.Set("cherry", 3)
+	m.Put("apple", 1)
+	m.Put("banana", 2)
+	m.Put("cherry", 3)
 
 	m.Delete("banana") // Remove the middle item
 
@@ -97,7 +97,7 @@ func TestDeleteOrder(t *testing.T) {
 
 func TestDeleteNonExistent(t *testing.T) {
 	m := New[string, int]()
-	m.Set("apple", 1)
+	m.Put("apple", 1)
 
 	// Delete non-existent key
 	m.Delete("banana") // Should not panic or error
@@ -119,8 +119,8 @@ func TestMapStructValues(t *testing.T) {
 	alice := Person{Name: "Alice", Age: 30}
 	bob := Person{Name: "Bob", Age: 25}
 
-	m.Set("alice", alice)
-	m.Set("bob", bob)
+	m.Put("alice", alice)
+	m.Put("bob", bob)
 
 	// basic gets
 	v, ok := m.Get("alice")
@@ -130,7 +130,7 @@ func TestMapStructValues(t *testing.T) {
 
 	// update struct
 	alice.Age = 31
-	m.Set("alice", alice)
+	m.Put("alice", alice)
 	v, _ = m.Get("alice")
 	if v.Age != 31 {
 		t.Errorf("expected alice age to be 31 after update, got %d", v.Age)
@@ -156,7 +156,7 @@ func TestCompactTriggeredAndOrderPreserved(t *testing.T) {
 	// insert 10 items
 	for i := 0; i < 10; i++ {
 		k := fmt.Sprintf("k%d", i)
-		m.Set(k, i)
+		m.Put(k, i)
 	}
 
 	// delete 6 items to trigger compact (deletedCount*2 > len(slots))
@@ -195,14 +195,14 @@ func TestDeleteThenReinsertAppearsAtEnd(t *testing.T) {
 	// insert four items
 	keys := []string{"one", "two", "three", "four"}
 	for i, k := range keys {
-		m.Set(k, i)
+		m.Put(k, i)
 	}
 
 	// remove the middle element "two"
 	m.Delete("two")
 
 	// re-insert "two" with a new value
-	m.Set("two", 20)
+	m.Put("two", 20)
 
 	// expected order: one, three, four, two
 	expected := []string{"one", "three", "four", "two"}
@@ -229,8 +229,8 @@ func TestDeleteThenReinsertAppearsAtEnd(t *testing.T) {
 
 func TestNewWithCapacityBasic(t *testing.T) {
 	m := NewWithCapacity[string, int](16)
-	m.Set("one", 1)
-	m.Set("two", 2)
+	m.Put("one", 1)
+	m.Put("two", 2)
 
 	if v, ok := m.Get("one"); !ok || v != 1 {
 		t.Errorf("expected one=1, got %v (ok=%v)", v, ok)
@@ -261,8 +261,8 @@ func TestMapConvenience(t *testing.T) {
 	}
 
 	// 2. Test Len and Has after additions
-	m.Set("apple", 1)
-	m.Set("banana", 2)
+	m.Put("apple", 1)
+	m.Put("banana", 2)
 	if m.Len() != 2 {
 		t.Errorf("Expected Len 2, got %d", m.Len())
 	}
@@ -289,7 +289,7 @@ func TestMapConvenience(t *testing.T) {
 	}
 
 	// Verify we can still add things after Clear
-	m.Set("cherry", 3)
+	m.Put("cherry", 3)
 	if m.Len() != 1 || !m.Has("cherry") {
 		t.Error("Map should work correctly after being cleared")
 	}

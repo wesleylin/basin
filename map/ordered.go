@@ -40,8 +40,8 @@ func (m *Map[K, V]) Get(key K) (V, bool) {
 	return m.slots[idx].value, true
 }
 
-// Set sets the value for a key in the map.
-func (m *Map[K, V]) Set(key K, val V) {
+// Put sets the value for a key in the map.
+func (m *Map[K, V]) Put(key K, val V) {
 	// check if key exists
 	if idx, exists := m.table[key]; exists {
 		m.slots[idx].value = val
