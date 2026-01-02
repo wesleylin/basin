@@ -108,3 +108,106 @@ func TestDeleteNonExistent(t *testing.T) {
 		t.Errorf("Expected apple to be 1, got %v", val)
 	}
 }
+
+func TestMapStructValues(t *testing.T) {
+	type Person struct {
+		Name string
+		Age  int
+	}
+
+	m := New[string, Person]()
+	alice := Person{Name: "Alice", Age: 30}
+	bob := Person{Name: "Bob", Age: 25}
+
+	m.Set("alice", alice)
+	m.Set("bob", bob)
+
+	// basic gets
+	v, ok := m.Get("alice")
+	if !ok || v.Name != "Alice" || v.Age != 30 {
+		t.Errorf("expected alice to be %+v, got %+v (ok=%v)", alice, v, ok)
+	}
+
+	// update struct
+	alice.Age = 31
+	m.Set("alice", alice)
+	v, _ = m.Get("alice")
+	if v.Age != 31 {
+		t.Errorf("expected alice age to be 31 after update, got %d", v.Age)
+	}
+
+	// order via All()
+	expectOrder := []string{"alice", "bob"}
+	i := 0
+	for k, _ := range m.All() {
+		if k != expectOrder[i] {
+			t.Errorf("All() order broken: expected %s at index %d, got %s", expectOrder[i], i, k)
+		}
+		i++
+	}
+	if i != len(expectOrder) {
+		t.Errorf("All() yielded %d items, expected %d", i, len(expectOrder))
+	}
+}
+
+func TestCompactTriggeredAndOrderPreserved(t *testing.T) {
+	m := New[string, int]()
+
+	// insert 10 items
+	for i := 0; i < 10; i++ {
+		k := fmt.Sprintf("k%d", i)
+		m.Set(k, i)
+	}
+
+	// delete 6 items to trigger compact (deletedCount*2 > len(slots))
+	for i := 0; i < 6; i++ {
+		m.Delete(fmt.Sprintf("k%d", i))
+	}
+
+	// remaining should be k6..k9 in that order
+	expected := []string{"k6", "k7", "k8", "k9"}
+	idx := 0
+	for k := range m.Keys() {
+		if idx >= len(expected) {
+			t.Errorf("unexpected extra key: %s", k)
+			break
+		}
+		if k != expected[idx] {
+			t.Errorf("Order broken after compact: expected %s at index %d, got %s", expected[idx], idx, k)
+		}
+		idx++
+	}
+	if idx != len(expected) {
+		t.Errorf("expected %d keys after deletes, got %d", len(expected), idx)
+	}
+
+	// verify values still accessible
+	for i, k := range expected {
+		v, ok := m.Get(k)
+		if !ok || v != i+6 {
+			t.Errorf("expected %s -> %d, got %d (ok=%v)", k, i+6, v, ok)
+		}
+	}
+}
+
+func TestNewWithCapacityBasic(t *testing.T) {
+	m := NewWithCapacity[string, int](16)
+	m.Set("one", 1)
+	m.Set("two", 2)
+
+	if v, ok := m.Get("one"); !ok || v != 1 {
+		t.Errorf("expected one=1, got %v (ok=%v)", v, ok)
+	}
+	if v, ok := m.Get("two"); !ok || v != 2 {
+		t.Errorf("expected two=2, got %v (ok=%v)", v, ok)
+	}
+
+	// delete and ensure other remains
+	m.Delete("one")
+	if _, ok := m.Get("one"); ok {
+		t.Errorf("expected one to be deleted")
+	}
+	if v, ok := m.Get("two"); !ok || v != 2 {
+		t.Errorf("expected two=2 after delete, got %v (ok=%v)", v, ok)
+	}
+}
