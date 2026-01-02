@@ -45,6 +45,7 @@ func (s *Set[K]) Insert(key K) bool {
 	return true
 }
 
+// All returns an iterator over all items in the set.
 func (s *Set[K]) All() iter.Seq[K] {
 	return func(yield func(K) bool) {
 		for _, e := range s.slots {
