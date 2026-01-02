@@ -31,6 +31,16 @@ func NewWithCapacity[K comparable, V any](cap int) *Map[K, V] {
 	}
 }
 
+func (m *Map[K, V]) Get(key K) (V, bool) {
+	idx, exists := m.table[key]
+	if !exists || m.slots[idx].deleted {
+		var zero V
+		return zero, false
+	}
+	return m.slots[idx].value, true
+}
+
+// Set sets the value for a key in the map.
 func (m *Map[K, V]) Set(key K, val V) {
 	// check if key exists
 	if idx, exists := m.table[key]; exists {
@@ -44,15 +54,6 @@ func (m *Map[K, V]) Set(key K, val V) {
 		key:   key,
 		value: val,
 	})
-}
-
-func (m *Map[K, V]) Get(key K) (V, bool) {
-	idx, exists := m.table[key]
-	if !exists || m.slots[idx].deleted {
-		var zero V
-		return zero, false
-	}
-	return m.slots[idx].value, true
 }
 
 // Delete removes a key-value pair from the map. Returns true if the key was present.
