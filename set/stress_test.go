@@ -16,7 +16,7 @@ func TestSet_Chaos(t *testing.T) {
 
 		switch op {
 		case 0: // ADD
-			s.Add(val)
+			s.Insert(val)
 			truth[val] = struct{}{}
 		case 1: // DELETE
 			s.Delete(val)

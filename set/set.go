@@ -28,8 +28,14 @@ func NewWithCapacity[K comparable](cap int) *Set[K] {
 	}
 }
 
-// Add inserts an item into the set. Returns true if it was newly added.
-func (s *Set[K]) Add(key K) bool {
+// Add inserts an item into the set. Returns the set for chaining.
+func (s *Set[K]) Add(key K) *Set[K] {
+	s.Insert(key)
+	return s
+}
+
+// Insert inserts an item into the set. Returns true if it was newly added.
+func (s *Set[K]) Insert(key K) bool {
 	if _, exists := s.table[key]; exists {
 		return false // Already existed and wasn't deleted
 	}
@@ -51,10 +57,17 @@ func (s *Set[K]) All() iter.Seq[K] {
 	}
 }
 
-func (s *Set[K]) Delete(key K) {
+// Remove removes an item from the set. Returns the set for chaining.
+func (s *Set[K]) Remove(key K) *Set[K] {
+	s.Delete(key)
+	return s
+}
+
+// Delete removes an item from the set. Returns true if the item was present.
+func (s *Set[K]) Delete(key K) bool {
 	idx, exists := s.table[key]
 	if !exists {
-		return
+		return false
 	}
 
 	// 1. remove from table to be added later
@@ -72,6 +85,7 @@ func (s *Set[K]) Delete(key K) {
 	if s.deletedCount*2 > len(s.slots) {
 		s.compact()
 	}
+	return true
 }
 
 func (s *Set[K]) compact() {
