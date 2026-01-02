@@ -1,8 +1,8 @@
 ## data structures
 
-OrderedMap note this is insertion order
+OrderedMap with not only generics but also new iterator based looping.
 
-Example
+For example:
 
 ```
 package main
@@ -29,6 +29,12 @@ func main() {
 	zoo.Set("kyle", Animal{"Kyle", "Kangaroo"}).
 	    Set("sam", Animal{"Sam", "Tiger"})
 }
+```
+
+Older libraries require you to nest the function with
+
+```
+zoo.Range(func(k, v)...)
 ```
 
 OrderedSet
