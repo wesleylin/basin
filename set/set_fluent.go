@@ -1,5 +1,17 @@
 package set
 
+// Add inserts an item into the set. Returns the set for chaining.
+func (s *Set[K]) Add(key K) *Set[K] {
+	s.Insert(key)
+	return s
+}
+
+// Remove removes an item from the set. Returns the set for chaining.
+func (s *Set[K]) Remove(key K) *Set[K] {
+	s.Delete(key)
+	return s
+}
+
 // Filter returns a new set containing only the elements that satisfy the predicate.
 // Pass in a function that takes an element and returns a boolean.
 // It preserves the "Ordered" nature of the original set.
