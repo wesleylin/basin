@@ -24,6 +24,13 @@ func New[K comparable, V any]() *Map[K, V] {
 	}
 }
 
+func NewWithCapacity[K comparable, V any](cap int) *Map[K, V] {
+	return &Map[K, V]{
+		table: make(map[K]int, cap),
+		slots: make([]entry[K, V], 0, cap),
+	}
+}
+
 func (m *Map[K, V]) Set(key K, val V) {
 	// check if key exists
 	if idx, exists := m.table[key]; exists {
