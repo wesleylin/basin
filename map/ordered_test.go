@@ -44,3 +44,29 @@ func TestMapOrder(t *testing.T) {
 		}
 	}
 }
+
+func TestMapAliases(t *testing.T) {
+	m := New[string, int]()
+	m.Set("x", 100)
+
+	// Test All()
+	for k, v := range m.All() {
+		if k != "x" || v != 100 {
+			t.Fail()
+		}
+	}
+}
+
+func TestMapKeys(t *testing.T) {
+	m := New[string, int]()
+	m.Set("x", 100)
+	m.Set("y", 200)
+
+	// Test Keys()
+	for k := range m.Keys() {
+		if k != "x" && k != "y" {
+			fmt.Println("Unexpected key:", k)
+			t.Fail()
+		}
+	}
+}
