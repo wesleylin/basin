@@ -28,12 +28,6 @@ func NewWithCapacity[K comparable](cap int) *Set[K] {
 	}
 }
 
-// Add inserts an item into the set. Returns the set for chaining.
-func (s *Set[K]) Add(key K) *Set[K] {
-	s.Insert(key)
-	return s
-}
-
 // Insert inserts an item into the set. Returns true if it was newly added.
 func (s *Set[K]) Insert(key K) bool {
 	if _, exists := s.table[key]; exists {
@@ -55,12 +49,6 @@ func (s *Set[K]) All() iter.Seq[K] {
 			}
 		}
 	}
-}
-
-// Remove removes an item from the set. Returns the set for chaining.
-func (s *Set[K]) Remove(key K) *Set[K] {
-	s.Delete(key)
-	return s
 }
 
 // Delete removes an item from the set. Returns true if the item was present.
