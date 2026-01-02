@@ -19,7 +19,8 @@ type Map[K comparable, V any] struct {
 func New[K comparable, V any]() *Map[K, V] {
 	return &Map[K, V]{
 		table: make(map[K]int),
-		slots: make([]entry[K, V], 0),
+		// pre allocate small amount of space
+		slots: make([]entry[K, V], 0, 8),
 	}
 }
 
@@ -45,6 +46,45 @@ func (m *Map[K, V]) Get(key K) (V, bool) {
 		return zero, false
 	}
 	return m.slots[idx].value, true
+}
+
+func (m *Map[K, V]) Delete(key K) {
+	idx, exists := m.table[key]
+
+	if !exists {
+		return
+	}
+
+	delete(m.table, key)
+	m.slots[idx].deleted = true
+	m.deletedCount++
+
+	// GC optimization, clear data so garbage collector can reclaim memory
+	var zeroK K
+	var zeroV V
+	m.slots[idx].key = zeroK
+	m.slots[idx].value = zeroV
+
+	// compact if more than half are deleted
+	if m.deletedCount*2 > len(m.slots) {
+		m.compact()
+	}
+}
+
+// compact remaining
+func (m *Map[K, V]) compact() {
+	newSlots := make([]entry[K, V], 0, len(m.slots)-m.deletedCount)
+
+	for _, e := range m.slots {
+		if !e.deleted {
+			// Update the table with items new position in new slice
+			m.table[e.key] = len(newSlots)
+			newSlots = append(newSlots, e)
+		}
+	}
+
+	m.slots = newSlots
+	m.deletedCount = 0
 }
 
 // All returns an iterator for all key-value pairs in order.
