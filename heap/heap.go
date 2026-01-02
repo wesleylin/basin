@@ -47,12 +47,13 @@ func (h *Heap[T, P]) Pop() (T, bool) {
 	return item.value, true
 }
 
-func (h *Heap[T, P]) Peek() (T, bool) {
+func (h *Heap[T, P]) Peek() (T, P, bool) {
 	if len(h.data) == 0 {
 		var zero T
-		return zero, false
+		var zeroP P
+		return zero, zeroP, false
 	}
-	return h.data[0].value, true
+	return h.data[0].value, h.data[0].priority, true
 }
 
 // Drain removes and yields all elements from the heap in priority order.

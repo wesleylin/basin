@@ -21,7 +21,7 @@ func TestHeapBasic(t *testing.T) {
 		t.Errorf("Expected 'high' (1), got %s", val)
 	}
 
-	val, _ = h.Peek()
+	val, _, _ = h.Peek()
 	if val != "mid" {
 		t.Errorf("Peek expected 'mid' (5), got %s", val)
 	}
