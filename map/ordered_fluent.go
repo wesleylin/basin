@@ -8,3 +8,9 @@ func (m *Map[K, V]) GetOr(key K, defaultVal V) V {
 	}
 	return defaultVal
 }
+
+// Set sets the value for a key in the map. It returns the ordered map for chaining.
+func (m *Map[K, V]) Set(key K, val V) *Map[K, V] {
+	m.Put(key, val)
+	return m
+}
