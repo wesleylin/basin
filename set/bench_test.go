@@ -8,7 +8,7 @@ func BenchmarkBasinSet_Add(b *testing.B) {
 	s := New[int]()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		s.Add(i % 1000)
+		s.Insert(i % 1000)
 	}
 }
 
@@ -23,7 +23,7 @@ func BenchmarkGoMap_Add(b *testing.B) {
 func BenchmarkBasinSet_Iterate(b *testing.B) {
 	s := New[int]()
 	for i := 0; i < 1000; i++ {
-		s.Add(i)
+		s.Insert(i)
 	}
 
 	b.ResetTimer()

@@ -10,11 +10,11 @@ func TestSetBasic(t *testing.T) {
 	fmt.Println("Created new set:", s)
 
 	// 1. adding value
-	added := s.Add("apple")
+	added := s.Insert("apple")
 	if !added {
 		t.Errorf("Expected apple to be newly added")
 	}
-	added = s.Add("banana")
+	added = s.Insert("banana")
 	if !added {
 		t.Errorf("Expected banana to be newly added")
 	}
@@ -26,7 +26,7 @@ func TestSetBasic(t *testing.T) {
 	}
 
 	// 3. adding duplicate
-	added = s.Add("apple")
+	added = s.Insert("apple")
 	if added {
 		t.Errorf("Expected apple to not be newly added again")
 	}
@@ -34,8 +34,8 @@ func TestSetBasic(t *testing.T) {
 
 func TestSetDelete(t *testing.T) {
 	s := New[int]()
-	s.Add(10)
-	s.Add(20)
+	s.Insert(10)
+	s.Insert(20)
 
 	s.Delete(10)
 	if s.Has(10) || s.Len() != 1 {
@@ -43,7 +43,7 @@ func TestSetDelete(t *testing.T) {
 	}
 
 	// Re-add deleted item
-	if !s.Add(10) {
+	if !s.Insert(10) {
 		t.Error("Should be able to re-add a deleted item")
 	}
 }
@@ -52,7 +52,7 @@ func TestSetIteration(t *testing.T) {
 	s := New[int]()
 	items := []int{100, 200, 300}
 	for _, v := range items {
-		s.Add(v)
+		s.Insert(v)
 	}
 
 	i := 0
@@ -66,7 +66,7 @@ func TestSetIteration(t *testing.T) {
 
 func TestSetClear(t *testing.T) {
 	s := New[int]()
-	s.Add(1)
+	s.Insert(1)
 	s.Clear()
 	if s.Len() != 0 {
 		t.Error("Clear failed")
@@ -75,13 +75,13 @@ func TestSetClear(t *testing.T) {
 
 func TestUnion(t *testing.T) {
 	s1 := New[string]()
-	s1.Add("apple")
-	s1.Add("banana")
+	s1.Insert("apple")
+	s1.Insert("banana")
 
 	s2 := New[string]()
-	s2.Add("banana") // Duplicate
-	s2.Add("cherry")
-	s2.Add("date")
+	s2.Insert("banana") // Duplicate
+	s2.Insert("cherry")
+	s2.Insert("date")
 
 	// The expected order is:
 	// 1. Everything from s1 ("apple", "banana")
@@ -108,7 +108,7 @@ func TestUnion(t *testing.T) {
 func TestUnionEmpty(t *testing.T) {
 	s1 := New[int]()
 	s2 := New[int]()
-	s2.Add(1)
+	s2.Insert(1)
 
 	// Union of empty and non-empty
 	found := false
@@ -125,12 +125,12 @@ func TestUnionEmpty(t *testing.T) {
 func TestIntersection(t *testing.T) {
 	s1 := New[int]()
 	for _, v := range []int{1, 2, 3, 4} {
-		s1.Add(v)
+		s1.Insert(v)
 	}
 
 	s2 := New[int]()
 	for _, v := range []int{3, 4, 5, 6} {
-		s2.Add(v)
+		s2.Insert(v)
 	}
 
 	// Expect [3, 4] because they are the common elements found in s1's order
@@ -150,12 +150,12 @@ func TestIntersection(t *testing.T) {
 func TestDifference(t *testing.T) {
 	s1 := New[int]()
 	for _, v := range []int{1, 2, 3, 4} {
-		s1.Add(v)
+		s1.Insert(v)
 	}
 
 	s2 := New[int]()
 	for _, v := range []int{3, 4} {
-		s2.Add(v)
+		s2.Insert(v)
 	}
 
 	// Expect [1, 2] because those are in s1 but not in s2
