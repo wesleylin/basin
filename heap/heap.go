@@ -55,6 +55,8 @@ func (h *Heap[T, P]) Peek() (T, bool) {
 	return h.data[0].value, true
 }
 
+// Drain removes and yields all elements from the heap in priority order.
+// Usage: for v := range h.Drain() { ... } will pop all elements.
 func (h *Heap[T, P]) Drain() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for {
