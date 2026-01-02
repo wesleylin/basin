@@ -55,11 +55,12 @@ func (m *Map[K, V]) Get(key K) (V, bool) {
 	return m.slots[idx].value, true
 }
 
-func (m *Map[K, V]) Delete(key K) {
+// Delete removes a key-value pair from the map. Returns true if the key was present.
+func (m *Map[K, V]) Delete(key K) bool {
 	idx, exists := m.table[key]
 
 	if !exists {
-		return
+		return false
 	}
 
 	delete(m.table, key)
@@ -76,6 +77,7 @@ func (m *Map[K, V]) Delete(key K) {
 	if m.deletedCount*2 > len(m.slots) {
 		m.compact()
 	}
+	return true
 }
 
 // compact remaining
