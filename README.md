@@ -31,7 +31,7 @@ func main() {
 }
 ```
 
-Older libraries require you to nest the function with
+Older libraries while pretty robust are usually still using slices requiring you to nest the function with
 
 ```
 zoo.Range(func(k, v)...)
@@ -63,3 +63,8 @@ Heap (priorityQueue) is not stable
 go test ./map
 
 go test -bench=. -benchmem
+
+## todo items
+
+- add more iterator convenience methods
+- wrap existing concurrent unordered hashmap
