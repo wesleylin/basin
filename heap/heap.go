@@ -2,6 +2,7 @@ package heap
 
 import (
 	"cmp"
+	"iter"
 )
 
 type entry[T any, P cmp.Ordered] struct {
@@ -52,6 +53,17 @@ func (h *Heap[T, P]) Peek() (T, bool) {
 		return zero, false
 	}
 	return h.data[0].value, true
+}
+
+func (h *Heap[T, P]) Drain() iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for {
+			val, ok := h.Pop()
+			if !ok || !yield(val) {
+				return
+			}
+		}
+	}
 }
 
 // --- Internal Heap Math ---
