@@ -30,12 +30,7 @@ func NewWithCapacity[K comparable](cap int) *Set[K] {
 
 // Add inserts an item into the set. Returns true if it was newly added.
 func (s *Set[K]) Add(key K) bool {
-	if idx, exists := s.table[key]; exists {
-		if s.slots[idx].deleted {
-			s.slots[idx].deleted = false
-			s.deletedCount--
-			return true
-		}
+	if _, exists := s.table[key]; exists {
 		return false // Already existed and wasn't deleted
 	}
 
@@ -62,7 +57,9 @@ func (s *Set[K]) Delete(key K) {
 		return
 	}
 
+	// 1. remove from table to be added later
 	delete(s.table, key)
+	// 2. mark tombstone in slots
 	s.slots[idx].deleted = true
 
 	// GC optimization: Zero out the key
@@ -71,6 +68,7 @@ func (s *Set[K]) Delete(key K) {
 
 	s.deletedCount++
 
+	// periodic cleanup if more than half are deleted
 	if s.deletedCount*2 > len(s.slots) {
 		s.compact()
 	}
