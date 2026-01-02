@@ -20,27 +20,29 @@ For example:
 ```
 package main
 
-import "github.com/yourusername/basin"
-
 type Animal struct {
-	Name string
-	Type string
+    Name string
+    Species string
 }
 
-// In Go 1.24, we use [Animal any] for the alias if we want it to be generic,
-// but here we are pinning it to the specific 'Animal' struct.
-type ZooMap = basin.OrderedMap[string, Animal]
-
 func main() {
-	// Initialize the map
-	zoo := basin.NewOrderedMap[string, Animal]()
+    zoo := basin.NewOrderedMap[string, Animal]()
 
-	// Using the Fluent API we designed:
-	// 1. We use 'Set' for fluent Map insertion.
-	// 2. Struct fields need strings in quotes.
-	// 3. Keys (strings) must be passed separately from the Value (Animal).
-	zoo.Set("kyle", Animal{"Kyle", "Kangaroo"}).
-	    Set("sam", Animal{"Sam", "Tiger"})
+    zoo.Put("A01", Animal{"Tony", "Tiger"})
+       .Put("A02", Animal{"Leo", "Lion"})
+       .Put("A03", Animal{"Shere Khan", "Tiger"})
+       .Put("A04", Animal{"Baloo", "Bear"})
+
+    // Goal: Find the names of the first 2 Tigers
+    tigerNames := zoo.Stream().
+        Filter(func(a Animal) bool {
+            return a.Species == "Tiger"
+        }).
+        Take(2).
+        Collect()
+
+    // tigerNames is inferred as []Animal automatically.
+    // No type casting, no runtime panics.
 }
 ```
 
