@@ -26,3 +26,21 @@ func TestMapBasic(t *testing.T) {
 		t.Errorf("Expected updated apple to be 10, got %v", val)
 	}
 }
+
+func TestMapOrder(t *testing.T) {
+	m := New[string, int]()
+
+	// add items in order
+	keys := []string{"first", "second", "third"}
+	for i, k := range keys {
+		m.Set(k, i)
+	}
+
+	// check same order
+	for i, k := range keys {
+		val, _ := m.Get(k)
+		if val != i {
+			t.Errorf("Order broken! Expected %s to have value %d", k, i)
+		}
+	}
+}
