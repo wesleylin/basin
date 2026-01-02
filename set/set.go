@@ -28,6 +28,12 @@ func NewWithCapacity[K comparable](cap int) *Set[K] {
 	}
 }
 
+// Has checks if the set contains the given key.
+func (s *Set[K]) Has(key K) bool {
+	_, exists := s.table[key]
+	return exists
+}
+
 // Insert inserts an item into the set. Returns true if it was newly added.
 func (s *Set[K]) Insert(key K) bool {
 	if _, exists := s.table[key]; exists {
@@ -89,12 +95,6 @@ func (s *Set[K]) compact() {
 }
 
 // helper functions
-
-func (s *Set[K]) Has(key K) bool {
-	_, exists := s.table[key]
-	return exists
-}
-
 func (s *Set[K]) Len() int {
 	return len(s.table)
 }
