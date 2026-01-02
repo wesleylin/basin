@@ -1,3 +1,14 @@
+# basin
+
+Basin is a high-performance data structure library for Go, engineered for the post-iterator era. By leveraging Generics (1.18+) and Native Iterators (1.23+), Basin provides a Fluent API that is strictly Type-Safe and Zero-Allocation—delivering lazy evaluation without the overhead of interface{} or extra heap allocations.
+
+| Feature     | Other Go Libs            | Basin                 |
+| ----------- | ------------------------ | --------------------- |
+| **Types**   | `interface{}` (Boxing)   | **Generics (Native)** |
+| **Memory**  | Eager (Allocates Slices) | **Lazy (Zero-Alloc)** |
+| **Syntax**  | Procedural / Nested      | **Fluent / Chained**  |
+| **Runtime** | Reflect/Assertions       | **Compile-time Safe** |
+
 ## data structures
 
 OrderedMap with not only generics but also new iterator based looping.
