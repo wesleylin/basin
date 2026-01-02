@@ -8,9 +8,9 @@ import (
 func TestHeapBasic(t *testing.T) {
 	h := New[string, int]() // Min-Heap
 
-	h.Push("low", 10)
-	h.Push("high", 1)
-	h.Push("mid", 5)
+	h.Insert("low", 10)
+	h.Insert("high", 1)
+	h.Insert("mid", 5)
 
 	if h.Len() != 3 {
 		t.Errorf("Expected length 3, got %d", h.Len())
@@ -30,9 +30,9 @@ func TestHeapBasic(t *testing.T) {
 func TestMaxHeap(t *testing.T) {
 	h := NewMax[string, int]()
 
-	h.Push("low", 1)
-	h.Push("high", 10)
-	h.Push("mid", 5)
+	h.Insert("low", 1)
+	h.Insert("high", 10)
+	h.Insert("mid", 5)
 
 	val, _ := h.Pop()
 	if val != "high" {
@@ -44,7 +44,7 @@ func TestHeapDrain(t *testing.T) {
 	h := New[int, int]()
 	input := []int{5, 3, 8, 1}
 	for _, v := range input {
-		h.Push(v, v)
+		h.Insert(v, v)
 	}
 
 	var result []int
@@ -67,9 +67,9 @@ func TestUnstableNature(t *testing.T) {
 	h := New[string, int]()
 
 	// Adding three items with the same priority
-	h.Push("A", 1)
-	h.Push("B", 1)
-	h.Push("C", 1)
+	h.Insert("A", 1)
+	h.Insert("B", 1)
+	h.Insert("C", 1)
 
 	var result []string
 	for val := range h.Drain() {

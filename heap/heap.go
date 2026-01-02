@@ -27,7 +27,7 @@ func NewMax[T any, P cmp.Ordered]() *Heap[T, P] {
 
 func (h *Heap[T, P]) Len() int { return len(h.data) }
 
-func (h *Heap[T, P]) Push(val T, priority P) {
+func (h *Heap[T, P]) Insert(val T, priority P) {
 	h.data = append(h.data, entry[T, P]{val, priority})
 	h.up(len(h.data) - 1)
 }
