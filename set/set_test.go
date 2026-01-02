@@ -121,3 +121,53 @@ func TestUnionEmpty(t *testing.T) {
 		t.Error("Union with empty set failed to yield items from non-empty set")
 	}
 }
+
+func TestIntersection(t *testing.T) {
+	s1 := New[int]()
+	for _, v := range []int{1, 2, 3, 4} {
+		s1.Add(v)
+	}
+
+	s2 := New[int]()
+	for _, v := range []int{3, 4, 5, 6} {
+		s2.Add(v)
+	}
+
+	// Expect [3, 4] because they are the common elements found in s1's order
+	expected := []int{3, 4}
+	count := 0
+	for item := range Intersect(s1, s2) {
+		if item != expected[count] {
+			t.Errorf("At index %d: expected %d, got %d", count, expected[count], item)
+		}
+		count++
+	}
+	if count != len(expected) {
+		t.Errorf("Expected %d items, got %d", len(expected), count)
+	}
+}
+
+func TestDifference(t *testing.T) {
+	s1 := New[int]()
+	for _, v := range []int{1, 2, 3, 4} {
+		s1.Add(v)
+	}
+
+	s2 := New[int]()
+	for _, v := range []int{3, 4} {
+		s2.Add(v)
+	}
+
+	// Expect [1, 2] because those are in s1 but not in s2
+	expected := []int{1, 2}
+	count := 0
+	for item := range Difference(s1, s2) {
+		if item != expected[count] {
+			t.Errorf("At index %d: expected %d, got %d", count, expected[count], item)
+		}
+		count++
+	}
+	if count != len(expected) {
+		t.Errorf("Expected %d items, got %d", len(expected), count)
+	}
+}

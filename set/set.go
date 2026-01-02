@@ -123,3 +123,33 @@ func Union[K comparable](a, b *Set[K]) iter.Seq[K] {
 		}
 	}
 }
+
+func Intersect[K comparable](a, b *Set[K]) iter.Seq[K] {
+	return func(yield func(K) bool) {
+		// Optimization: iterate over the smaller set to minimize lookups
+		target, check := a, b
+		if b.Len() < a.Len() {
+			target, check = b, a
+		}
+
+		for item := range target.All() {
+			if check.Has(item) {
+				if !yield(item) {
+					return
+				}
+			}
+		}
+	}
+}
+
+func Difference[K comparable](a, b *Set[K]) iter.Seq[K] {
+	return func(yield func(K) bool) {
+		for item := range a.All() {
+			if !b.Has(item) {
+				if !yield(item) {
+					return
+				}
+			}
+		}
+	}
+}
