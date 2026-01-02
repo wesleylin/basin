@@ -86,6 +86,8 @@ func (s *Set[K]) compact() {
 	s.deletedCount = 0
 }
 
+// helper functions
+
 func (s *Set[K]) Has(key K) bool {
 	_, exists := s.table[key]
 	return exists
@@ -99,4 +101,25 @@ func (s *Set[K]) Clear() {
 	clear(s.table)
 	s.slots = s.slots[:0]
 	s.deletedCount = 0
+}
+
+// set algebra operations
+
+func Union[K comparable](a, b *Set[K]) iter.Seq[K] {
+	return func(yield func(K) bool) {
+		// Just streaming from the existing 'slots' of a
+		for item := range a.All() {
+			if !yield(item) {
+				return
+			}
+		}
+		// Just streaming from b, checking against a's hash table
+		for item := range b.All() {
+			if !a.Has(item) {
+				if !yield(item) {
+					return
+				}
+			}
+		}
+	}
 }

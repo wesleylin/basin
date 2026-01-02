@@ -72,3 +72,52 @@ func TestSetClear(t *testing.T) {
 		t.Error("Clear failed")
 	}
 }
+
+func TestUnion(t *testing.T) {
+	s1 := New[string]()
+	s1.Add("apple")
+	s1.Add("banana")
+
+	s2 := New[string]()
+	s2.Add("banana") // Duplicate
+	s2.Add("cherry")
+	s2.Add("date")
+
+	// The expected order is:
+	// 1. Everything from s1 ("apple", "banana")
+	// 2. Everything from s2 NOT in s1 ("cherry", "date")
+	expected := []string{"apple", "banana", "cherry", "date"}
+
+	count := 0
+	for item := range Union(s1, s2) {
+		if count >= len(expected) {
+			t.Errorf("Union yielded more items than expected")
+			break
+		}
+		if item != expected[count] {
+			t.Errorf("At index %d: expected %s, got %s", count, expected[count], item)
+		}
+		count++
+	}
+
+	if count != len(expected) {
+		t.Errorf("Expected %d items, got %d", len(expected), count)
+	}
+}
+
+func TestUnionEmpty(t *testing.T) {
+	s1 := New[int]()
+	s2 := New[int]()
+	s2.Add(1)
+
+	// Union of empty and non-empty
+	found := false
+	for item := range Union(s1, s2) {
+		if item == 1 {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("Union with empty set failed to yield items from non-empty set")
+	}
+}
