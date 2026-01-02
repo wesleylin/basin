@@ -31,3 +31,44 @@ func TestSetBasic(t *testing.T) {
 		t.Errorf("Expected apple to not be newly added again")
 	}
 }
+
+func TestSetDelete(t *testing.T) {
+	s := New[int]()
+	s.Add(10)
+	s.Add(20)
+
+	s.Delete(10)
+	if s.Has(10) || s.Len() != 1 {
+		t.Error("Delete failed to remove item or update length")
+	}
+
+	// Re-add deleted item
+	if !s.Add(10) {
+		t.Error("Should be able to re-add a deleted item")
+	}
+}
+
+func TestSetIteration(t *testing.T) {
+	s := New[int]()
+	items := []int{100, 200, 300}
+	for _, v := range items {
+		s.Add(v)
+	}
+
+	i := 0
+	for val := range s.All() {
+		if val != items[i] {
+			t.Errorf("Iteration order broken: expected %d, got %d", items[i], val)
+		}
+		i++
+	}
+}
+
+func TestSetClear(t *testing.T) {
+	s := New[int]()
+	s.Add(1)
+	s.Clear()
+	if s.Len() != 0 {
+		t.Error("Clear failed")
+	}
+}
