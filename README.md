@@ -86,9 +86,9 @@ for v := range m.Values() { ... }
 m.Stream().Filter(fn).Collect()
 ```
 
-## streams
+## iter with 3rd party streams
 
-You can use other existing stream libraries with
+You can use other existing stream libraries for example
 
 ```
 import "github.com/samber/lo"
@@ -97,9 +97,16 @@ zoo := basin.NewOrderedMap[string, Animal]()
 
 ...
 
-
+// Old way convert iter back to list and then filter
 result := lo.Filter(slices.Collect(zoo.Values()), func(v Animal, _ int) bool {
     return v.Type == "Tiger"
+})
+
+
+// This is the Go 1.23+ way with lo zoo.Values() returns iter.Seq[Animal]
+// lo.Filter returns a slice, but it consumes the iterator lazily
+result := lo.Filter(lo.FromPairs(zoo.All()), func(item lo.Entry[string, Animal], _ int) bool {
+    return item.Value.Type == "Tiger"
 })
 ```
 
