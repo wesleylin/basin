@@ -58,6 +58,18 @@ Heap (priorityQueue) is not stable
 | **Heap**          | Insertion | `Insert(v, p)` | `void`      | `Push(v, p)`  | `*Heap[V, P]` |
 | -                 | Removal   | `Pop()`        | `(V, bool)` | `Drop()`      | `*Heap[V, P]` |
 
+## streams
+
+You can use other existing stream libraries with
+
+```
+import "github.com/samber/lo"
+
+result := lo.Filter(slices.Collect(myBasinMap.Values()), func(v Animal, _ int) bool {
+    return v.Type == "Tiger"
+})
+```
+
 ## development
 
 go test ./map
