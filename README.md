@@ -11,3 +11,5 @@ Heap (priorityQueue) is not stable
 ## development
 
 go test ./map
+
+go test -bench=. -benchmem
