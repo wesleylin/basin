@@ -74,6 +74,18 @@ Above are the general methods. There are two variants the regular one that retur
 | -                 | `Take(n)`    | `Stream[T]`       | —          | Lazy          |
 | -                 | `Collect()`  | `[]T`             | —          | **Terminal**  |
 
+You can choose either way to retrieve values from the maps and sets. Use the normal .Values() .All() if you want the normal golang 1.23+ iterators. Use the .Stream() if you use the wrapped Stream().
+
+The main advantage of the Stream() is that it is easier to chain, but it is slightly slower.
+
+```
+// Option A: Standard Go
+for v := range m.Values() { ... }
+
+// Option B: Basin Fluent
+m.Stream().Filter(fn).Collect()
+```
+
 ## streams
 
 You can use other existing stream libraries with
