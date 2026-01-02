@@ -58,6 +58,22 @@ Heap (priorityQueue) is not stable
 | **Heap**          | Insertion | `Insert(v, p)` | `void`      | `Push(v, p)`  | `*Heap[V, P]` |
 | -                 | Removal   | `Pop()`        | `(V, bool)` | `Drop()`      | `*Heap[V, P]` |
 
+Above are the general methods. There are two variants the regular one that returns a bool on success and the fluent variant that can be chained as in `om := orderedMap.Set(1, "one").Set(2, "two").Remove(1)`
+
+| **Data Stucture** | Operation    | Core Method       | Returns    | Fluent Method |
+| ----------------- | ------------ | ----------------- | ---------- | ------------- |
+| **Set**           | `All()`      | `iter.Seq[T]`     | `v T`      | Lazy          |
+| -                 | `Query()`    | `Stream[T]`       | —          | Lazy (Fluent) |
+| **OrderedMap**    | `All()`      | `iter.Seq2[K, V]` | `k K, v V` | Lazy          |
+| -                 | `Keys()`     | `iter.Seq[K]`     | `k K`      | Lazy          |
+| -                 | `Values()`   | `iter.Seq[V]`     | `v V`      | Lazy          |
+| -                 | `Query()`    | `Stream[V]`       | —          | Lazy (Fluent) |
+| **Heap**          | `Drain()`    | `iter.Seq[V]`     | `v V`      | **Consuming** |
+| -                 | `Query()`    | `Stream[V]`       | —          | Lazy (Fluent) |
+| **Stream**        | `Filter(fn)` | `Stream[T]`       | —          | Lazy          |
+| -                 | `Take(n)`    | `Stream[T]`       | —          | Lazy          |
+| -                 | `Collect()`  | `[]T`             | —          | **Terminal**  |
+
 ## streams
 
 You can use other existing stream libraries with
@@ -65,7 +81,12 @@ You can use other existing stream libraries with
 ```
 import "github.com/samber/lo"
 
-result := lo.Filter(slices.Collect(myBasinMap.Values()), func(v Animal, _ int) bool {
+zoo := basin.NewOrderedMap[string, Animal]()
+
+...
+
+
+result := lo.Filter(slices.Collect(zoo.Values()), func(v Animal, _ int) bool {
     return v.Type == "Tiger"
 })
 ```
