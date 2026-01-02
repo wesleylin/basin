@@ -190,6 +190,43 @@ func TestCompactTriggeredAndOrderPreserved(t *testing.T) {
 	}
 }
 
+func TestDeleteThenReinsertAppearsAtEnd(t *testing.T) {
+	m := New[string, int]()
+	// insert four items
+	keys := []string{"one", "two", "three", "four"}
+	for i, k := range keys {
+		m.Set(k, i)
+	}
+
+	// remove the middle element "two"
+	m.Delete("two")
+
+	// re-insert "two" with a new value
+	m.Set("two", 20)
+
+	// expected order: one, three, four, two
+	expected := []string{"one", "three", "four", "two"}
+	i := 0
+	for k := range m.Keys() {
+		if i >= len(expected) {
+			t.Errorf("unexpected extra key: %s", k)
+			break
+		}
+		if k != expected[i] {
+			t.Errorf("Order broken after reinsert: expected %s at index %d, got %s", expected[i], i, k)
+		}
+		i++
+	}
+	if i != len(expected) {
+		t.Errorf("expected %d keys after reinsert, got %d", len(expected), i)
+	}
+
+	// verify the reinserted value is the new one
+	if v, ok := m.Get("two"); !ok || v != 20 {
+		t.Errorf("expected two=20 after reinsert, got %v (ok=%v)", v, ok)
+	}
+}
+
 func TestNewWithCapacityBasic(t *testing.T) {
 	m := NewWithCapacity[string, int](16)
 	m.Set("one", 1)
