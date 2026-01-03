@@ -2,6 +2,8 @@ package orderedmap_test
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/wesleylin/basin/orderedmap"
@@ -91,4 +93,103 @@ func TestJSON_ComplexValues(t *testing.T) {
 	if v.Age != 30 {
 		t.Errorf("expected age 30, got %d", v.Age)
 	}
+
+}
+
+func TestJSON_LargeNestedFile(t *testing.T) {
+	filename := "complex_data.json"
+
+	// 1. Setup: Generate the file
+	err := GenerateLargeJSON(filename, 100)
+	if err != nil {
+		t.Fatalf("failed to create test file: %v", err)
+	}
+	defer os.Remove(filename) // Clean up after test
+
+	// 2. Load the file
+	content, err := os.ReadFile(filename)
+	if err != nil {
+		t.Fatalf("failed to read test file: %v", err)
+	}
+
+	// 3. Unmarshal into OrderedMap
+	// Using map[string]any for the values to handle the complex nested nature
+	m := orderedmap.New[string, map[string]any]()
+	err = json.Unmarshal(content, m)
+	if err != nil {
+		t.Fatalf("unmarshal failed: %v", err)
+	}
+
+	// 4. Verify properties
+	if m.Len() != 100 {
+		t.Errorf("expected 100 users, got %d", m.Len())
+	}
+
+	// Check a specific nested field deep in the map
+	user, ok := m.Get("user_0050")
+	if !ok {
+		t.Fatal("could not find user_0050")
+	}
+
+	profile := user["profile"].(map[string]any)
+	socials := profile["socials"].(map[string]any)
+
+	if socials["github"] != "https://github.com/basin" {
+		t.Errorf("expected basin github, got %v", socials["github"])
+	}
+
+	// 5. Verify Stream Integrity
+	// Ensure the first key is user_0000 and last is user_0099
+	// (Standard maps would shuffle these)
+	count := 0
+	var firstKey, lastKey string
+	for k := range m.Keys() {
+		if count == 0 {
+			firstKey = k
+		}
+		lastKey = k
+		count++
+	}
+
+	if firstKey != "user_0000" || lastKey != "user_0099" {
+		t.Errorf("Order lost during JSON unmarshal! First: %s, Last: %s", firstKey, lastKey)
+	}
+}
+
+// GenerateLargeJSON("complex_data.json", 100)
+
+func GenerateLargeJSON(filename string, count int) error {
+	data := make(map[string]interface{})
+	for i := 0; i < count; i++ {
+		key := fmt.Sprintf("user_%04d", i)
+		data[key] = map[string]interface{}{
+			"id":       i,
+			"active":   i%2 == 0,
+			"username": fmt.Sprintf("dev_node_%d", i),
+			"profile": map[string]interface{}{
+				"bio": "Software Engineer at Basin Corp",
+				"socials": map[string]interface{}{
+					"github":  "https://github.com/basin",
+					"twitter": "@basin_io",
+				},
+				"stats": map[string]int{
+					"commits": 100 * i,
+					"stars":   5 * i,
+				},
+			},
+			"tags": []string{"golang", "ordered-map", "stream", "performance"},
+			"config": map[string]string{
+				"theme": "dark",
+				"font":  "JetBrains Mono",
+			},
+			// Adding more fields to hit the 30+ requirement...
+			"meta_1": "v1", "meta_2": "v2", "meta_3": "v3",
+			"meta_4": "v4", "meta_5": "v5", "meta_6": "v6",
+			"meta_7": "v7", "meta_8": "v8", "meta_9": "v9",
+			"meta_10": "v10",
+		}
+	}
+
+	bytes, _ := json.MarshalIndent(data, "", "  ")
+	return os.WriteFile(filename, bytes, 0644)
 }
