@@ -2,6 +2,8 @@ package ordered
 
 import (
 	"iter"
+
+	"github.com/wesleylin/basin/stream"
 )
 
 type entry[K comparable, V any] struct {
@@ -135,6 +137,24 @@ func (m *Map[K, V]) Values() iter.Seq[V] {
 			}
 		}
 	}
+}
+
+// Stream returns a Basin Stream2 which yields keys and values in insertion order.
+func (m *Map[K, V]) Stream() stream.Stream2[K, V] {
+	var err error
+
+	// Create the iterator logic
+	seq := func(yield func(K, V) bool) {
+		// Replace this loop with however your map actually iterates.
+		// Example if you use a slice of entries internally:
+		for _, entry := range m.slots {
+			if !yield(entry.key, entry.value) {
+				return
+			}
+		}
+	}
+
+	return stream.New2(seq, &err)
 }
 
 // Convenience methods
