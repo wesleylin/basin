@@ -127,7 +127,9 @@ result := lo.Filter(lo.FromPairs(zoo.All()), func(item lo.Entry[string, Animal],
 
 ## development
 
-go test ./map
+go test ./...
+
+go test ./orderedmap
 
 go test -bench=. -benchmem
 
