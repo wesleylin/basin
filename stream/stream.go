@@ -10,6 +10,8 @@ type Stream[T any] struct {
 	err *error
 }
 
+// constructors
+
 // New wraps a standard Go 1.23 iterator into a Basin Stream.
 // It requires a pointer to an error so the stream remains "Error-Aware."
 func New[T any](seq iter.Seq[T], errPtr *error) Stream[T] {
@@ -22,6 +24,23 @@ func New[T any](seq iter.Seq[T], errPtr *error) Stream[T] {
 	return Stream[T]{
 		seq: seq,
 		err: errPtr,
+	}
+}
+
+// FromSlice creates a Stream from a standard Go slice.
+// Since slices are in-memory, the error pointer will stay nil
+// unless a later operation (like MapErr) trips it.
+func FromSlice[T any](items []T) Stream[T] {
+	var err error
+	return Stream[T]{
+		err: &err,
+		seq: func(yield func(T) bool) {
+			for _, v := range items {
+				if !yield(v) {
+					return
+				}
+			}
+		},
 	}
 }
 
