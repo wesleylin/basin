@@ -1,4 +1,4 @@
-package ordered
+package orderedmap
 
 // GetOr returns the value for a key, or the provided default if it doesn't exist.
 func (m *Map[K, V]) GetOr(key K, defaultVal V) V {

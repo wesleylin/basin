@@ -3,11 +3,11 @@ package tests
 import (
 	"testing"
 
-	ordered "github.com/wesleylin/basin/orderedmap"
+	"github.com/wesleylin/basin/orderedmap"
 )
 
 func TestOrderedMapStreaming(t *testing.T) {
-	m := ordered.New[string, int]()
+	m := orderedmap.New[string, int]()
 	m.Put("first", 1)
 	m.Put("second", 2)
 	m.Put("third", 3)
