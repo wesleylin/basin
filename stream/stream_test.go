@@ -1,6 +1,7 @@
 package stream
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"testing"
@@ -74,6 +75,66 @@ func TestStream(t *testing.T) {
 
 		if !slices.Equal(got, input) {
 			t.Errorf("got %v, want %v", got, input)
+		}
+	})
+}
+
+func TestCount(t *testing.T) {
+	t.Run("counts all items in a simple slice", func(t *testing.T) {
+		items := []int{1, 2, 3, 4, 5}
+
+		// Create a stream from a standard slice
+		s := FromSeq(slices.Values(items))
+
+		count, err := s.Count()
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if count != 5 {
+			t.Errorf("expected count 5, got %d", count)
+		}
+	})
+
+	t.Run("counts correctly after filtering", func(t *testing.T) {
+		items := []int{1, 2, 3, 4, 5, 6}
+
+		s := FromSeq(slices.Values(items))
+
+		// Chain a filter for even numbers
+		count, err := s.Filter(func(n int) bool { return n%2 == 0 }).Count()
+
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if count != 3 {
+			t.Errorf("expected count 3, got %d", count)
+		}
+	})
+
+	t.Run("returns error when stream is poisoned", func(t *testing.T) {
+		sentinelErr := errors.New("database connection lost")
+		var streamErr error
+
+		// Create a stream that fails on the 3rd item
+		s := New(func(yield func(int) bool) {
+			for i := 1; i <= 5; i++ {
+				if i == 3 {
+					streamErr = sentinelErr // Trip the Live Wire
+					return                  // Stop iterating
+				}
+				if !yield(i) {
+					return
+				}
+			}
+		}, &streamErr)
+
+		count, err := s.Count()
+
+		if !errors.Is(err, sentinelErr) {
+			t.Errorf("expected error %v, got %v", sentinelErr, err)
+		}
+		if count != 0 {
+			t.Errorf("expected count 0 on error, got %d", count)
 		}
 	})
 }
