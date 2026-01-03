@@ -1,6 +1,8 @@
 package orderedmap
 
-import "testing"
+import (
+	"testing"
+)
 
 type Animal struct {
 	Name string
@@ -36,4 +38,26 @@ func TestOrderMapExample(t *testing.T) {
 	if index != len(expectedOrder) {
 		t.Errorf("Expected %d items, got %d", len(expectedOrder), index)
 	}
+}
+
+func TestOrderMapExample2(t *testing.T) {
+	// Initialize the map
+	zoo := New[string, Animal]()
+
+	// can chain most calls calls
+	zoo = zoo.Set("kyle", Animal{"Kyle", "Kangaroo"}).
+		Set("sam", Animal{"Sam", "Tiger"})
+
+	zooStream := zoo.Stream2()
+
+	zooStream = zooStream.Filter(func(k string, a Animal) bool {
+		return a.Type == "Tiger" || a.Type == "Lion"
+	})
+
+	// zooStream = stream.Map
+
+	// zooStream = zooStream.Map(func(k string, a Animal) (string, Animal) {
+	// 	a.Name = "Big " + a.Name
+	// 	return k, a
+	// }
 }

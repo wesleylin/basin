@@ -40,9 +40,6 @@ func main() {
         }).
         Take(2).
         Collect()
-
-    // tigerNames is inferred as []Animal automatically.
-    // No type casting, no runtime panics.
 }
 ```
 
