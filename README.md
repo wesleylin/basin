@@ -192,6 +192,28 @@ go test -bench=. -benchmem
 
 go test -bench=. -benchmem > bench_results.txt
 
+| benchmark                 | iterations    | time per op        | memory        | allocs |
+| ------------------------- | ------------- | ------------------ | ------------- | ------ |
+| **Put (Basin)** - 100     | $214,558,254$ | $5.891\\text{ ns}$ | $0\\text{ B}$ | $0$    |
+| **Put (StdMap)** - 100    | $217,225,171$ | $5.704\\text{ ns}$ | $0\\text{ B}$ | $0$    |
+| **Put (Basin)** - 1,000   | $202,188,237$ | $5.927\\text{ ns}$ | $0\\text{ B}$ | $0$    |
+| **Put (StdMap)** - 1,000  | $207,942,988$ | $6.135\\text{ ns}$ | $0\\text{ B}$ | $0$    |
+| **Put (Basin)** - 10,000  | $159,800,976$ | $7.499\\text{ ns}$ | $0\\text{ B}$ | $0$    |
+| **Put (StdMap)** - 10,000 | $166,129,954$ | $7.204\\text{ ns}$ | $0\\text{ B}$ | $0$    |
+| **Get (Basin)**           | $227,376,798$ | $5.114\\text{ ns}$ | $0\\text{ B}$ | $0$    |
+| **Get (StdMap)**          | $241,516,156$ | $5.088\\text{ ns}$ | $0\\text{ B}$ | $0$    |
+
+The put and get operations were around the same time.
+
+| benchmark              | iterations   | time per op         | type                            |
+| ---------------------- | ------------ | ------------------- | ------------------------------- |
+| **Iterate (Basin)**    | $400,747$    | $3,377\\text{ ns}$  | **$\\approx 20\\times$ Faster** |
+| **Iterate (StdMap)**   | $19,369$     | $67,479\\text{ ns}$ | Baseline                        |
+| **Before Compact**     | $2,373,374$  | $524.0\\text{ ns}$  | Baseline                        |
+| **After Compact**      | $3,816,990$  | $313.9\\text{ ns}$  | **$+40\\%$ Efficiency**         |
+| **Basin (No Compact)** | $49,238,680$ | $25.08\\text{ ns}$  | Baseline                        |
+| **StdMap (Memory)**    | $60,622,773$ | $19.64\\text{ ns}$  | $\\approx 21\\%$ faster         |
+
 ## todo items
 
     [x] add more iterator convenience methods
