@@ -96,6 +96,20 @@ func TestJSON_ComplexValues(t *testing.T) {
 
 }
 
+func TestJSON_IntKeys(t *testing.T) {
+	m := orderedmap.New[int, string]()
+	input := `{"10": "ten", "20": "twenty"}`
+
+	if err := json.Unmarshal([]byte(input), m); err != nil {
+		t.Fatalf("Failed to unmarshal int keys: %v", err)
+	}
+
+	val, _ := m.Get(10)
+	if val != "ten" {
+		t.Errorf("Expected 'ten', got %v", val)
+	}
+}
+
 func TestJSON_LargeNestedFile(t *testing.T) {
 	filename := "complex_data.json"
 

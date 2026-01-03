@@ -67,13 +67,31 @@ func (m *Map[K, V]) UnmarshalJSON(data []byte) error {
 			return err
 		}
 
-		// In JSON, keys are always strings
+		// Convert token to string (JSON keys are always syntactically strings)
+		t, ok := t.(string)
+		if !ok {
+			return fmt.Errorf("expected string key, got %v", t)
+		}
 		keyStr := fmt.Sprintf("%v", t)
-		// You may need a more robust way to convert keyStr back to type K
-		// if K is not a string (e.g., using json.Unmarshal on the token).
+
 		var key K
-		if err := json.Unmarshal([]byte(fmt.Sprintf("%q", keyStr)), &key); err != nil {
-			return err
+		var kAny any = &key
+
+		// Use a type switch on the pointer to the key
+		switch k := kAny.(type) {
+		case *string:
+			*k = keyStr
+		case *int:
+			fmt.Sscanf(keyStr, "%d", k)
+		case *int64:
+			fmt.Sscanf(keyStr, "%d", k)
+		case *float64:
+			fmt.Sscanf(keyStr, "%f", k)
+		default:
+			// Fallback for custom types or other primitives
+			if err := json.Unmarshal([]byte(fmt.Sprintf("%q", keyStr)), &key); err != nil {
+				return err
+			}
 		}
 
 		// Read Value
