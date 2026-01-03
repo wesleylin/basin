@@ -140,7 +140,7 @@ func (m *Map[K, V]) Values() iter.Seq[V] {
 }
 
 // Stream returns a Basin Stream2 which yields keys and values in insertion order.
-func (m *Map[K, V]) Stream() stream.Stream2[K, V] {
+func (m *Map[K, V]) Stream2() stream.Stream2[K, V] {
 	var err error
 
 	// Create the iterator logic
