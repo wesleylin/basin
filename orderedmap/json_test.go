@@ -110,6 +110,70 @@ func TestJSON_IntKeys(t *testing.T) {
 	}
 }
 
+func TestJSON_Array(t *testing.T) {
+	t.Run("Array of ints as values", func(t *testing.T) {
+
+		m := orderedmap.New[string, []int]()
+		input := `{"numbers": [1, 2, 3]}`
+
+		if err := json.Unmarshal([]byte(input), m); err != nil {
+			t.Fatalf("Failed to unmarshal array: %v", err)
+		}
+
+		val, _ := m.Get("numbers")
+		if len(val) != 3 || val[0] != 1 || val[1] != 2 || val[2] != 3 {
+			t.Errorf("Expected [1,2,3], got %v", val)
+		}
+	})
+
+	t.Run("Array of maps as values", func(t *testing.T) {
+
+		m := orderedmap.New[string, []map[string]int]()
+		input := `{"items": [{"a":1}, {"b":2}]}`
+
+		if err := json.Unmarshal([]byte(input), m); err != nil {
+			t.Fatalf("Failed to unmarshal array of maps: %v", err)
+		}
+
+		val, _ := m.Get("items")
+		if len(val) != 2 || val[0]["a"] != 1 || val[1]["b"] != 2 {
+			t.Errorf("Expected [{\"a\":1}, {\"b\":2}], got %v", val)
+		}
+	})
+
+	t.Run("Array as one value", func(t *testing.T) {
+
+		m := orderedmap.New[string, any]()
+		input := `{"title": "test", "items": [{"a":1}, {"b":2}]}`
+
+		if err := json.Unmarshal([]byte(input), m); err != nil {
+			t.Fatalf("Failed to unmarshal array of maps: %v", err)
+		}
+
+		titleRaw, _ := m.Get("title")
+		title, ok := titleRaw.(string)
+		if !ok || title != "test" {
+			t.Errorf("Expected title 'test', got %v", titleRaw)
+		}
+
+		val, _ := m.Get("items")
+		items, ok := val.([]interface{})
+		if !ok {
+			t.Fatalf("Expected items to be []interface{}, got %T", val)
+		}
+
+		firstItem, ok := items[0].(map[string]interface{})
+		if !ok {
+			t.Fatalf("Expected first item to be map[string]interface{}, got %T", items[0])
+		}
+
+		valA, ok := firstItem["a"].(float64) // JSON numbers are float64
+		if !ok || valA != 1.0 {
+			t.Fatalf("Expected first item 'a' to be float64, got %T", firstItem["a"])
+		}
+	})
+}
+
 func TestJSON_LargeNestedFile(t *testing.T) {
 	filename := "complex_data.json"
 
