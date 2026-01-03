@@ -63,16 +63,67 @@ func (s Stream[T]) Skip(n int) Stream[T] {
 		seq: func(yield func(T) bool) {
 			skipped := 0
 			for v := range s.seq {
+				// exit early if there's an error
+				if s.err != nil && *s.err != nil {
+					return
+				}
+
 				if skipped < n {
 					skipped++
 					continue
 				}
+
 				if !yield(v) {
 					return
 				}
 			}
 		}}
 }
+
+// Short circuting functions First, Any, All
+
+// First returns the first element of the stream.
+func (s Stream[T]) First() (T, error) {
+	var zero T
+	// range s.seq will execute the iterator
+	for v := range s.seq {
+		// Even for the first item, we check if the source failed
+		if s.err != nil && *s.err != nil {
+			return zero, *s.err
+		}
+		return v, nil
+	}
+	return zero, s.check()
+}
+
+// Any returns true if any element of the stream matches the predicate.
+func (s Stream[T]) Any(fn func(T) bool) (bool, error) {
+	for v := range s.seq {
+		if s.err != nil && *s.err != nil {
+			return false, *s.err
+		}
+		if fn(v) {
+			// short circuit and return true
+			return true, nil
+		}
+	}
+	return false, s.check()
+}
+
+// All returns true if all elements of the stream match the predicate.
+func (s Stream[T]) All(fn func(T) bool) (bool, error) {
+	for v := range s.seq {
+		if s.err != nil && *s.err != nil {
+			return false, *s.err
+		}
+		if !fn(v) {
+			return false, nil
+		}
+	}
+	return true, s.check()
+}
+
+// Terminal functions Collect, Count, and ForEach
 
 // Count counts the number of items in the stream.
 func (s Stream[T]) Count() (int, error) {
@@ -110,4 +161,12 @@ func FromSeq[T any](seq iter.Seq[T]) Stream[T] {
 	// err is instantiated here
 	var err error
 	return Stream[T]{seq: seq, err: &err}
+}
+
+// check is a private helper to keep things DRY
+func (s Stream[T]) check() error {
+	if s.err != nil && *s.err != nil {
+		return *s.err
+	}
+	return nil
 }
