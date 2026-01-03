@@ -6,7 +6,15 @@ Functinos
 
 - Filter
 - Map
+- MapErr
 - Collect
 - First
 - Take
 - Count
+
+Category,Functions
+Filtering,"Filter, Take, Skip"
+Search,"First, Any, All"
+Terminal,"Collect, Count, ForEach"
+
+Mapping,"Map, MapErr, FlatMap"

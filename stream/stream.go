@@ -25,6 +25,8 @@ func New[T any](seq iter.Seq[T], errPtr *error) Stream[T] {
 	}
 }
 
+// Filtering functions Filter, Take, Skip
+
 // Filter creates a lazy iterator that only yields matching items.
 func (s Stream[T]) Filter(fn func(T) bool) Stream[T] {
 	return Stream[T]{
@@ -51,6 +53,23 @@ func (s Stream[T]) Take(n int) Stream[T] {
 					return
 				}
 				count++
+			}
+		}}
+}
+
+func (s Stream[T]) Skip(n int) Stream[T] {
+	return Stream[T]{
+		err: s.err,
+		seq: func(yield func(T) bool) {
+			skipped := 0
+			for v := range s.seq {
+				if skipped < n {
+					skipped++
+					continue
+				}
+				if !yield(v) {
+					return
+				}
 			}
 		}}
 }
