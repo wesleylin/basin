@@ -88,5 +88,7 @@ func (s Stream[T]) Seq() iter.Seq[T] {
 }
 
 func FromSeq[T any](seq iter.Seq[T]) Stream[T] {
-	return Stream[T]{seq: seq}
+	// err is instantiated here
+	var err error
+	return Stream[T]{seq: seq, err: &err}
 }
