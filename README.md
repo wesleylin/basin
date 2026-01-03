@@ -26,6 +26,48 @@ type Animal struct {
 }
 
 func main() {
+    // instantiate orderedmap
+    zoo := orderedmap.New[string, Animal]()
+
+	// chain set calls
+	zoo = zoo.Set("kyle", Animal{"Kyle", "Kangaroo"}).
+		Set("sam", Animal{"Sam", "Tiger"}).Set("leo", Animal{"Leo", "Tiger"})
+
+
+    // convert to a stream
+    // alternatively can directly fetch as iter.Seq2
+    // with zoo.All()
+	zooStream := zoo.Stream2()
+
+    // (delayed) filter and then return same stream
+	zooStream = zooStream.Filter(func(k string, a Animal) bool {
+		return a.Type == "Tiger" || a.Type == "Lion"
+	})
+
+    // (delayed) convert animal to string
+	zooStream = stream.Map2(zooStream, func(k string, a Animal) (string, Animal) {
+		a.Name = a.Name + " the Great"
+		return k, a
+	})
+
+    // collect results
+    // we can also check if there were any errors
+	results, err := zooStream.Collect()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+    // []string{"Sam the Great", "Leo the Great"}
+    fmt.Println(results)
+}
+```
+
+We can easily create an orderedmap. And then in order loop through the results by converting to Stream which is a lightweight wrapper over iter.Seq2. Main benefit of the wrapper is we can check if any errors happened once Collect() is attempted.
+
+```
+
+func main() {
+
     zoo := basin.NewOrderedMap[string, Animal]()
 
     zoo.Put("A01", Animal{"Tony", "Tiger"})
@@ -82,7 +124,13 @@ Heap (priorityQueue) is not stable
 | **Heap**          | Insertion | `Insert(v, p)` | `void`      | `Push(v, p)`  | `*Heap[V, P]` |
 | -                 | Removal   | `Pop()`        | `(V, bool)` | `Drop()`      | `*Heap[V, P]` |
 
-Above are the general methods. There are two variants the regular one that returns a bool on success and the fluent variant that can be chained as in `om := orderedMap.Set(1, "one").Set(2, "two").Remove(1)`
+Above are the general methods. There are two variants the regular one that returns a bool on success and the fluent variant that can be chained as in `om := orderedMap.Set(1, "one").Set(2, "two").Remove(1)` or on multiple lines as
+
+```
+om := orderedMap.Set(1, "one")
+om = om.Set(2, "two")
+om = om.Remove(1)
+```
 
 | **Data Stucture** | Operation    | Core Method       | Returns    | Fluent Method |
 | ----------------- | ------------ | ----------------- | ---------- | ------------- |
@@ -98,9 +146,9 @@ Above are the general methods. There are two variants the regular one that retur
 | -                 | `Take(n)`    | `Stream[T]`       | —          | Lazy          |
 | -                 | `Collect()`  | `[]T`             | —          | **Terminal**  |
 
-You can choose either way to retrieve values from the maps and sets. Use the normal .Values() .All() if you want the normal golang 1.23+ iterators. Use the .Stream() if you use the wrapped Stream().
+The map, heap, and set datastructures can then be iterated over with 2 ways. Use the normal .Values() .All() if you want the normal golang 1.23+ iterators. Use the Stream variants if you want to use the wrapped Stream().
 
-The main advantage of the Stream() is that it is easier to chain, but it is slightly slower.
+The main advantage of the Stream() is that it is easier to chain, and keeps the error until the last Collect.
 
 ```
 // Option A: Standard Go
