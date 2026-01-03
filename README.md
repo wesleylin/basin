@@ -52,6 +52,18 @@ Older libraries while pretty robust are usually still using slices requiring you
 zoo.Range(func(k, v)...)
 ```
 
+OrderedMap is stable and updates will keep the key in place. For example if it has
+
+```
+{
+    "dog": 7,
+    "cat": 8
+    "zebra": 5
+}
+```
+
+and we update the cat to value 90, the place in the hashmap will not be moved to the end.
+
 OrderedSet
 
 Naively benchmarked can be 5x faster, but uses twice the memory for keys. will test more

@@ -43,11 +43,13 @@ func (m *Map[K, V]) Get(key K) (V, bool) {
 }
 
 // Put sets the value for a key in the map.
+// Brand new insertions are placed at the end in order
+// If the key already exists, its value is updated but its order remains unchanged.
+// If the key was deleted previously it will be moved to the end as a new insertion.
 func (m *Map[K, V]) Put(key K, val V) {
 	// check if key exists
 	if idx, exists := m.table[key]; exists {
 		m.slots[idx].value = val
-		m.slots[idx].deleted = false
 		return
 	}
 

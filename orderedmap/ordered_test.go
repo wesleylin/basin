@@ -1,12 +1,15 @@
-package orderedmap
+package orderedmap_test
 
 import (
 	"fmt"
+	"slices"
 	"testing"
+
+	"github.com/wesleylin/basin/orderedmap"
 )
 
 func TestMapBasic(t *testing.T) {
-	m := New[string, int]()
+	m := orderedmap.New[string, int]()
 	fmt.Println("Created new ordered map:", m)
 
 	// 1. setting value
@@ -28,7 +31,7 @@ func TestMapBasic(t *testing.T) {
 }
 
 func TestMapOrder(t *testing.T) {
-	m := New[string, int]()
+	m := orderedmap.New[string, int]()
 
 	// add items in order
 	keys := []string{"first", "second", "third"}
@@ -46,7 +49,7 @@ func TestMapOrder(t *testing.T) {
 }
 
 func TestMapAliases(t *testing.T) {
-	m := New[string, int]()
+	m := orderedmap.New[string, int]()
 	m.Put("x", 100)
 
 	// Test All()
@@ -58,7 +61,7 @@ func TestMapAliases(t *testing.T) {
 }
 
 func TestMapKeys(t *testing.T) {
-	m := New[string, int]()
+	m := orderedmap.New[string, int]()
 	m.Put("x", 100)
 	m.Put("y", 200)
 
@@ -72,7 +75,7 @@ func TestMapKeys(t *testing.T) {
 }
 
 func TestDeleteOrder(t *testing.T) {
-	m := New[string, int]()
+	m := orderedmap.New[string, int]()
 	m.Put("apple", 1)
 	m.Put("banana", 2)
 	m.Put("cherry", 3)
@@ -96,7 +99,7 @@ func TestDeleteOrder(t *testing.T) {
 }
 
 func TestDeleteNonExistent(t *testing.T) {
-	m := New[string, int]()
+	m := orderedmap.New[string, int]()
 	m.Put("apple", 1)
 
 	// Delete non-existent key
@@ -115,7 +118,7 @@ func TestMapStructValues(t *testing.T) {
 		Age  int
 	}
 
-	m := New[string, Person]()
+	m := orderedmap.New[string, Person]()
 	alice := Person{Name: "Alice", Age: 30}
 	bob := Person{Name: "Bob", Age: 25}
 
@@ -151,7 +154,7 @@ func TestMapStructValues(t *testing.T) {
 }
 
 func TestCompactTriggeredAndOrderPreserved(t *testing.T) {
-	m := New[string, int]()
+	m := orderedmap.New[string, int]()
 
 	// insert 10 items
 	for i := 0; i < 10; i++ {
@@ -191,7 +194,7 @@ func TestCompactTriggeredAndOrderPreserved(t *testing.T) {
 }
 
 func TestDeleteThenReinsertAppearsAtEnd(t *testing.T) {
-	m := New[string, int]()
+	m := orderedmap.New[string, int]()
 	// insert four items
 	keys := []string{"one", "two", "three", "four"}
 	for i, k := range keys {
@@ -228,7 +231,7 @@ func TestDeleteThenReinsertAppearsAtEnd(t *testing.T) {
 }
 
 func TestNewWithCapacityBasic(t *testing.T) {
-	m := NewWithCapacity[string, int](16)
+	m := orderedmap.NewWithCapacity[string, int](16)
 	m.Put("one", 1)
 	m.Put("two", 2)
 
@@ -250,7 +253,7 @@ func TestNewWithCapacityBasic(t *testing.T) {
 }
 
 func TestMapConvenience(t *testing.T) {
-	m := New[string, int]()
+	m := orderedmap.New[string, int]()
 
 	// 1. Test Len and Has on empty map
 	if m.Len() != 0 {
@@ -284,13 +287,49 @@ func TestMapConvenience(t *testing.T) {
 	if m.Len() != 0 {
 		t.Errorf("Expected Len 0 after Clear, got %d", m.Len())
 	}
-	if len(m.slots) != 0 {
-		t.Errorf("Slots should be length 0 after Clear, got %d", len(m.slots))
+	count := 0
+	for range m.Keys() {
+		count++
+	}
+	if count != 0 {
+		t.Errorf("Expected 0 keys after Clear, got %d", count)
 	}
 
 	// Verify we can still add things after Clear
 	m.Put("cherry", 3)
 	if m.Len() != 1 || !m.Has("cherry") {
 		t.Error("Map should work correctly after being cleared")
+	}
+}
+
+func TestMapOrderStability(t *testing.T) {
+	m := orderedmap.New[string, int]()
+
+	// 1. Initial Order: A, B, C
+	m.Put("A", 1)
+	m.Put("B", 2)
+	m.Put("C", 3)
+
+	// 2. Update "B": Should NOT change order
+	m.Put("B", 20)
+
+	// Check order via a slice (or your Stream method if ready)
+	keys := slices.Collect(m.Keys())
+	if keys[1] != "B" {
+		t.Errorf("Expected B at index 1 after update, got %v", keys[1])
+	}
+
+	// 3. Delete "A" and Re-insert: Should move "A" to the END
+	m.Delete("A")
+	m.Put("A", 100)
+
+	// New Expected Order: B, C, A
+	finalKeys := slices.Collect(m.Keys())
+	expected := []string{"B", "C", "A"}
+
+	for i, k := range expected {
+		if finalKeys[i] != k {
+			t.Errorf("At index %d: expected %s, got %s", i, k, finalKeys[i])
+		}
 	}
 }
