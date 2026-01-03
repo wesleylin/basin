@@ -1,0 +1,21 @@
+Created new ordered map: &{map[] [] 0}
+goos: darwin
+goarch: arm64
+pkg: github.com/wesleylin/basin/orderedmap
+cpu: Apple M2 Pro
+BenchmarkPut_Basin/Size-100-10           	214558254	         5.891 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPut_Basin/Size-1000-10          	202188237	         5.927 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPut_Basin/Size-10000-10         	159800976	         7.499 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPut_StdMap/Size-100-10          	217225171	         5.704 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPut_StdMap/Size-1000-10         	207942988	         6.135 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPut_StdMap/Size-10000-10        	166129954	         7.204 ns/op	       0 B/op	       0 allocs/op
+BenchmarkGet_Basin-10                    	227376798	         5.114 ns/op	       0 B/op	       0 allocs/op
+BenchmarkGet_StdMap-10                   	241516156	         5.088 ns/op	       0 B/op	       0 allocs/op
+BenchmarkIterate_Basin-10                	  400747	      3377 ns/op	       0 B/op	       0 allocs/op
+BenchmarkIterate_StdMap-10               	   19369	     67479 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMemoryPressure/BeforeCompact-10 	 2373374	       524.0 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMemoryPressure/AfterCompact-10  	 3816990	       313.9 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMemoryPressure_Comparison/Basin_NoCompact-10         	49238680	        25.08 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMemoryPressure_Comparison/StdMap-10                  	60622773	        19.64 ns/op	       0 B/op	       0 allocs/op
+PASS
+ok  	github.com/wesleylin/basin/orderedmap	23.862s

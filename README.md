@@ -145,6 +145,8 @@ go test ./orderedmap
 
 go test -bench=. -benchmem
 
+go test -bench=. -benchmem > bench_results.txt
+
 ## todo items
 
 - add more iterator convenience methods

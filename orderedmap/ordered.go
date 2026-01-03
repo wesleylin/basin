@@ -63,41 +63,61 @@ func (m *Map[K, V]) Put(key K, val V) {
 // Delete removes a key-value pair from the map. Returns true if the key was present.
 func (m *Map[K, V]) Delete(key K) bool {
 	idx, exists := m.table[key]
-
 	if !exists {
 		return false
 	}
 
+	// 1. Remove from lookup table
 	delete(m.table, key)
-	m.slots[idx].deleted = true
+
+	// 2. Clear the entry in the slice immediately.
+	// Overwrite with a zero-value entry{deleted: true},
+	// we release references to the Key and Value so the GC can free them
+	// without waiting for a Compact().
+	m.slots[idx] = entry[K, V]{deleted: true}
 	m.deletedCount++
 
-	// GC optimization, clear data so garbage collector can reclaim memory
-	var zeroK K
-	var zeroV V
-	m.slots[idx].key = zeroK
-	m.slots[idx].value = zeroV
-
-	// compact if more than half are deleted
-	if m.deletedCount*2 > len(m.slots) {
-		m.compact()
+	// 3. Amortized compaction
+	// We only pay the O(n) cost when the "waste" is significant.
+	// 1024 is a sweet spot to avoid thrashing on small maps.
+	if m.deletedCount > 1024 && m.deletedCount*2 > len(m.slots) {
+		m.Compact()
 	}
+
 	return true
 }
 
 // compact remaining
-func (m *Map[K, V]) compact() {
-	newSlots := make([]entry[K, V], 0, len(m.slots)-m.deletedCount)
-
-	for _, e := range m.slots {
-		if !e.deleted {
-			// Update the table with items new position in new slice
-			m.table[e.key] = len(newSlots)
-			newSlots = append(newSlots, e)
-		}
+func (m *Map[K, V]) Compact() {
+	if m.deletedCount == 0 {
+		return
 	}
 
-	m.slots = newSlots
+	// 'j' represents the next position for a live element
+	j := 0
+	for i := 0; i < len(m.slots); i++ {
+		if m.slots[i].deleted {
+			continue
+		}
+
+		// Move element forward if there's a gap
+		if i != j {
+			m.slots[j] = m.slots[i]
+			// Update the table with the new index
+			m.table[m.slots[j].key] = j
+		}
+		j++
+	}
+
+	// 40GB Safety Step:
+	// We must zero out the "tail" of the slice that we just moved away from.
+	// If we don't, the old pointers will stay in memory until the slice grows!
+	for k := j; k < len(m.slots); k++ {
+		m.slots[k] = entry[K, V]{}
+	}
+
+	// Reslice to the new live length
+	m.slots = m.slots[:j]
 	m.deletedCount = 0
 }
 
