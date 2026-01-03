@@ -2,6 +2,8 @@ package orderedmap
 
 import (
 	"testing"
+
+	"github.com/wesleylin/basin/stream"
 )
 
 type Animal struct {
@@ -46,7 +48,7 @@ func TestOrderMapExample2(t *testing.T) {
 
 	// can chain most calls calls
 	zoo = zoo.Set("kyle", Animal{"Kyle", "Kangaroo"}).
-		Set("sam", Animal{"Sam", "Tiger"})
+		Set("sam", Animal{"Sam", "Tiger"}).Set("leo", Animal{"Leo", "Tiger"})
 
 	zooStream := zoo.Stream2()
 
@@ -54,10 +56,24 @@ func TestOrderMapExample2(t *testing.T) {
 		return a.Type == "Tiger" || a.Type == "Lion"
 	})
 
-	// zooStream = stream.Map
+	zooStream = stream.Map2(zooStream, func(k string, a Animal) (string, Animal) {
+		a.Name = a.Name + " the Great"
+		return k, a
+	})
 
-	// zooStream = zooStream.Map(func(k string, a Animal) (string, Animal) {
-	// 	a.Name = "Big " + a.Name
-	// 	return k, a
-	// }
+	results, err := zooStream.Collect()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(results) != 2 {
+		t.Fatalf("expected 2 results, got %d", len(results))
+	}
+
+	expectedNames := []string{"Sam the Great", "Leo the Great"}
+	for i, p := range results {
+		if p.Value.Name != expectedNames[i] {
+			t.Errorf("at index %d: expected name %s, got %s", i, expectedNames[i], p.Value.Name)
+		}
+	}
 }
