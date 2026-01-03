@@ -149,5 +149,7 @@ go test -bench=. -benchmem > bench_results.txt
 
 ## todo items
 
-- add more iterator convenience methods
-- wrap existing concurrent unordered hashmap
+    [x] add more iterator convenience methods
+    [ ] wrap existing concurrent unordered hashmap
+
+    [ ]compaction optimization segmented shards (probably 7 day effort)
