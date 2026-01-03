@@ -111,6 +111,7 @@ func (s Stream[T]) Any(fn func(T) bool) (bool, error) {
 }
 
 // All returns true if all elements of the stream match the predicate.
+// note if the stream is empty, All returns true.
 func (s Stream[T]) All(fn func(T) bool) (bool, error) {
 	for v := range s.seq {
 		if s.err != nil && *s.err != nil {

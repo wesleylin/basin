@@ -1,5 +1,7 @@
 package stream
 
+import "iter"
+
 // basin.Map(myStream, func(int) string)
 func Map[T, R any](s Stream[T], fn func(T) R) Stream[R] {
 	return Stream[R]{
@@ -28,4 +30,28 @@ func MapErr[T any](s Stream[T], fn func(T) (T, error)) Stream[T] {
 				}
 			}
 		}}
+}
+
+// FlatMap transforms T into an iterator of R, then flattens them into a single Stream[R].
+func FlatMap[T, R any](s Stream[T], fn func(T) iter.Seq[R]) Stream[R] {
+	return Stream[R]{
+		err: s.err, // Preserve error
+		seq: func(yield func(R) bool) {
+			for v := range s.seq {
+				// Circuit Breaker
+				if s.err != nil && *s.err != nil {
+					return
+				}
+
+				subSeq := fn(v)
+
+				//Flatten the sub-sequence into the main yield
+				for subItem := range subSeq {
+					if !yield(subItem) {
+						return
+					}
+				}
+			}
+		},
+	}
 }
