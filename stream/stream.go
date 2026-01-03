@@ -7,7 +7,7 @@ import (
 
 type Stream[T any] struct {
 	seq iter.Seq[T]
-	err error
+	err *error
 }
 
 // Filter creates a lazy iterator that only yields matching items.
@@ -36,8 +36,15 @@ func (s Stream[T]) Take(n int) Stream[T] {
 	}}
 }
 
-func (s Stream[T]) Collect() []T {
-	return slices.Collect(s.seq)
+// Collect gathers all items into a slice and returns any error encountered.
+func (s Stream[T]) Collect() ([]T, error) {
+	items := slices.Collect(s.seq)
+
+	if s.err != nil && *s.err != nil {
+		return nil, *s.err
+	}
+
+	return items, nil
 }
 
 // Seq returns the raw Go 1.23 iterator for use in for-range loops.

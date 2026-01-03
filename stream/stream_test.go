@@ -11,10 +11,14 @@ func TestStream(t *testing.T) {
 		input := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 
 		// Logic: Take even numbers, but only the first 3
-		got := FromSeq(slices.Values(input)).
+		got, err := FromSeq(slices.Values(input)).
 			Filter(func(n int) bool { return n%2 == 0 }).
 			Take(3).
 			Collect()
+
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
 
 		want := []int{2, 4, 6}
 		if !slices.Equal(got, want) {
@@ -36,7 +40,7 @@ func TestStream(t *testing.T) {
 			})
 
 		// We only want 2 items, so the filter should NOT run for 3, 4, or 5
-		_ = s.Collect()
+		_, _ = s.Collect()
 
 		if processedCount != 2 {
 			t.Errorf("expected to process 2 items, but processed %d", processedCount)
@@ -45,9 +49,13 @@ func TestStream(t *testing.T) {
 
 	t.Run("Empty Stream", func(t *testing.T) {
 		var input []int
-		got := FromSeq(slices.Values(input)).
+		got, err := FromSeq(slices.Values(input)).
 			Filter(func(n int) bool { return true }).
 			Collect()
+
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
 
 		if len(got) != 0 {
 			t.Errorf("expected empty slice, got %v", got)
@@ -56,9 +64,13 @@ func TestStream(t *testing.T) {
 
 	t.Run("Take More Than Available", func(t *testing.T) {
 		input := []int{1, 2}
-		got := FromSeq(slices.Values(input)).
+		got, err := FromSeq(slices.Values(input)).
 			Take(10).
 			Collect()
+
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
 
 		if !slices.Equal(got, input) {
 			t.Errorf("got %v, want %v", got, input)
