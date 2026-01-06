@@ -1,0 +1,17 @@
+BenchmarkParallelPut             9820924               237.4 ns/op
+BenchmarkParallelPut-4          21769173                53.78 ns/op
+BenchmarkParallelPut-8          25541787                42.82 ns/op
+BenchmarkParallelGet            49308567                22.54 ns/op
+BenchmarkParallelGet-4          68406926                17.93 ns/op
+BenchmarkParallelGet-8          77861618                14.04 ns/op
+BenchmarkContention             22906627               138.2 ns/op
+BenchmarkContention-4           32232687                34.88 ns/op
+BenchmarkContention-8           35074856                32.55 ns/op
+BenchmarkSingleMutexMap         29470874               111.0 ns/op
+BenchmarkSingleMutexMap-4       16008136                79.17 ns/op
+BenchmarkSingleMutexMap-8       17101426                74.72 ns/op
+BenchmarkMap_Set                11296384               242.5 ns/op
+BenchmarkMap_Set-4              20310322                56.17 ns/op
+BenchmarkMap_Set-8              26418309                44.06 ns/op
+PASS
+ok      github.com/wesleylin/basin/concurrentmap        28.043s
