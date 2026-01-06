@@ -2,6 +2,8 @@ package concurrentsequencedmap
 
 import (
 	"sync"
+
+	orderedmap "github.com/wesleylin/basin/sequencedmap"
 )
 
 type Map[K comparable, V any] struct {
@@ -16,5 +18,5 @@ type entry[V any] struct {
 
 type shard[K comparable, V any] struct {
 	sync.RWMutex
-	data map[K]entry[V] // Now stores an entry struct instead of raw V
+	data orderedmap.Map[K, V] // Now stores an entry struct instead of raw V
 }
