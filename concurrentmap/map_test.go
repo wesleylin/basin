@@ -67,6 +67,25 @@ func TestMap_Concurrency(t *testing.T) {
 	wg.Wait()
 }
 
+func TestMap_HighContention_SameShard(t *testing.T) {
+	m := New[int, int]()
+	var wg sync.WaitGroup
+
+	// We force many goroutines to hit the exact same keys
+	// This tests if our Mutexes handle extreme "wait queues"
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for j := 0; j < 10000; j++ {
+				m.Put(j%10, j) // Only uses 10 keys across all threads
+				m.Get(j % 10)
+			}
+		}()
+	}
+	wg.Wait()
+}
+
 func BenchmarkMap_Set(b *testing.B) {
 	m := New[int, int]()
 	b.RunParallel(func(pb *testing.PB) {
