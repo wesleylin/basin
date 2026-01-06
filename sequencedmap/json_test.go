@@ -1,4 +1,4 @@
-package orderedmap_test
+package sequencedmap_test
 
 import (
 	"encoding/json"

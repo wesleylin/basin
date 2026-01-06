@@ -1,4 +1,4 @@
-package orderedmap
+package sequencedmap
 
 import (
 	"testing"
