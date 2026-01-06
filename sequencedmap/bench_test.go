@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/wesleylin/basin/orderedmap"
+	orderedmap "github.com/wesleylin/basin/sequencedmap"
 )
 
 // --- PUT BENCHMARKS ---

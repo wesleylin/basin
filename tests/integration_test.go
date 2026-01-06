@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/wesleylin/basin/orderedmap"
+	orderedmap "github.com/wesleylin/basin/sequencedmap"
 )
 
 func TestOrderedMapStreaming(t *testing.T) {

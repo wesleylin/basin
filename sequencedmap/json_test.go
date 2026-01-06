@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/wesleylin/basin/orderedmap"
+	orderedmap "github.com/wesleylin/basin/sequencedmap"
 )
 
 func TestJSON_Marshal(t *testing.T) {

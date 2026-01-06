@@ -3,7 +3,7 @@ package orderedmap_test
 import (
 	"testing"
 
-	"github.com/wesleylin/basin/orderedmap"
+	orderedmap "github.com/wesleylin/basin/sequencedmap"
 )
 
 func TestMap_Backward(t *testing.T) {

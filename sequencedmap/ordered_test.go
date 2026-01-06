@@ -5,7 +5,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/wesleylin/basin/orderedmap"
+	orderedmap "github.com/wesleylin/basin/sequencedmap"
 )
 
 func TestMapBasic(t *testing.T) {
