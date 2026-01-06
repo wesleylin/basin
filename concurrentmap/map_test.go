@@ -9,14 +9,14 @@ func TestMap_Basic(t *testing.T) {
 	m := New[string, int]()
 
 	// Test Set and Get
-	m.Set("apple", 1)
+	m.Put("apple", 1)
 	val, ok := m.Get("apple")
 	if !ok || val != 1 {
 		t.Errorf("expected 1, got %v", val)
 	}
 
 	// Test Update
-	m.Set("apple", 2)
+	m.Put("apple", 2)
 	val, _ = m.Get("apple")
 	if val != 2 {
 		t.Errorf("expected updated value 2, got %v", val)
@@ -44,7 +44,7 @@ func TestMap_Concurrency(t *testing.T) {
 			for j := 0; j < numIterations; j++ {
 				// Use different keys to test shard distribution
 				key := gID*numIterations + j
-				m.Set(key, j)
+				m.Put(key, j)
 			}
 		}(i)
 	}
@@ -72,7 +72,7 @@ func BenchmarkMap_Set(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		i := 0
 		for pb.Next() {
-			m.Set(i, i)
+			m.Put(i, i)
 			i++
 		}
 	})

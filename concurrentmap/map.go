@@ -38,7 +38,7 @@ func (m *Map[K, V]) getShard(key K) *shard[K, V] {
 }
 
 // Set adds or updates a key-value pair.
-func (m *Map[K, V]) Set(key K, value V) {
+func (m *Map[K, V]) Put(key K, value V) {
 	s := m.getShard(key)
 	s.Lock()
 	s.data[key] = value
