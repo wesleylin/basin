@@ -61,3 +61,16 @@ func (m *Map[K, V]) Delete(key K) {
 	delete(s.data, key)
 	s.Unlock()
 }
+
+// Pop deletes and returns the value (Atomic Get + Delete)
+// use this instead of using both Get and Delete to ensure atomicity
+func (m *Map[K, V]) Pop(key K) (V, bool) {
+	s := m.getShard(key)
+	s.Lock()
+	defer s.Unlock()
+	val, ok := s.data[key]
+	if ok {
+		delete(s.data, key)
+	}
+	return val, ok
+}
