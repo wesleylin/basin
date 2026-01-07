@@ -45,3 +45,24 @@ func TestMap_All(t *testing.T) {
 		}
 	}
 }
+
+func TestMap_All_EarlyExit(t *testing.T) {
+	m := concurrentsortedmap.New[int, string]()
+	for i := 0; i < 100; i++ {
+		m.Put(i, "data")
+	}
+
+	count := 0
+	for _, _ = range m.All() {
+		count++
+		if count == 10 {
+			break // Exit early
+		}
+	}
+
+	if count != 10 {
+		t.Errorf("Expected to have iterated 10 times, got %d", count)
+	}
+	// If this test passes without hanging or leaking,
+	// your 'defer stop()' logic is solid.
+}
