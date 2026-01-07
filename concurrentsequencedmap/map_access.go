@@ -55,3 +55,26 @@ func (m *Map[K, V]) All() iter.Seq2[K, V] {
 		}
 	}
 }
+
+// Keys returns an iterator for the map's keys in insertion order.
+func (m *Map[K, V]) Keys() iter.Seq[K] {
+	// TODO: possibly optimize to not call All to remove retrieving Value() as well
+	return func(yield func(K) bool) {
+		for k, _ := range m.All() {
+			if !yield(k) {
+				return
+			}
+		}
+	}
+}
+
+// Values returns an iterator for the map's values in insertion order.
+func (m *Map[K, V]) Values() iter.Seq[V] {
+	return func(yield func(V) bool) {
+		for _, v := range m.All() {
+			if !yield(v) {
+				return
+			}
+		}
+	}
+}
