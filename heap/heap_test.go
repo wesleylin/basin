@@ -16,7 +16,7 @@ func TestHeapBasic(t *testing.T) {
 		t.Errorf("Expected length 3, got %d", h.Len())
 	}
 
-	val, _ := h.Pop()
+	_, val, _ := h.Pop()
 	if val != "high" {
 		t.Errorf("Expected 'high' (1), got %s", val)
 	}
@@ -34,7 +34,7 @@ func TestMaxHeap(t *testing.T) {
 	h.Insert("high", 10)
 	h.Insert("mid", 5)
 
-	val, _ := h.Pop()
+	_, val, _ := h.Pop()
 	if val != "high" {
 		t.Errorf("Max-Heap expected 'high' (10), got %s", val)
 	}
@@ -83,7 +83,7 @@ func TestUnstableNature(t *testing.T) {
 
 func TestEmptyHeap(t *testing.T) {
 	h := New[int, int]()
-	_, ok := h.Pop()
+	_, _, ok := h.Pop()
 	if ok {
 		t.Error("Pop on empty heap should return ok=false")
 	}
@@ -99,17 +99,17 @@ func TestHeapReplace(t *testing.T) {
 	// The root was 10, now the new root should be 50
 	h.Replace("ultra-low", 200)
 
-	val, _ := h.Pop()
+	_, val, _ := h.Pop()
 	if val != "medium" {
 		t.Errorf("Expected medium (50) after replace, got %s", val)
 	}
 
-	val, _ = h.Pop()
+	_, val, _ = h.Pop()
 	if val != "low" {
 		t.Errorf("Expected low (100), got %s", val)
 	}
 
-	val, _ = h.Pop()
+	_, val, _ = h.Pop()
 	if val != "ultra-low" {
 		t.Errorf("Expected ultra-low (200), got %s", val)
 	}
@@ -127,7 +127,7 @@ func TestHeapFix(t *testing.T) {
 	h.Fix(0)
 
 	// New root should be B (20)
-	val, _ := h.Pop()
+	_, val, _ := h.Pop()
 	if val != "B" {
 		t.Errorf("After Fix, expected B at root, got %s", val)
 	}

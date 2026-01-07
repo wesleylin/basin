@@ -55,10 +55,11 @@ func (h *Heap[T, P]) Fix(i int) {
 	}
 }
 
-func (h *Heap[T, P]) Pop() (T, bool) {
+func (h *Heap[T, P]) Pop() (P, T, bool) {
 	if len(h.data) == 0 {
-		var zero T
-		return zero, false
+		var zeroP P
+		var zeroT T
+		return zeroP, zeroT, false
 	}
 
 	n := len(h.data) - 1
@@ -73,7 +74,7 @@ func (h *Heap[T, P]) Pop() (T, bool) {
 	h.data[n] = entry[T, P]{zero, zeroP}
 
 	h.data = h.data[:n]
-	return item.value, true
+	return item.priority, item.value, true
 }
 
 func (h *Heap[T, P]) Peek() (T, P, bool) {
@@ -90,7 +91,7 @@ func (h *Heap[T, P]) Peek() (T, P, bool) {
 func (h *Heap[T, P]) Drain() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for {
-			val, ok := h.Pop()
+			_, val, ok := h.Pop()
 			if !ok || !yield(val) {
 				return
 			}

@@ -9,36 +9,58 @@ import (
 // All returns an iterator over all key-value pairs in sorted order.
 func (m *Map[K, V]) All() iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
-		h := heap.New[K, V]()
+		// shardCursor acts as a local buffer for each shard's stream
+		type shardCursor struct {
+			curr V                   // The value we've already pulled and are "holding"
+			next func() (K, V, bool) // The function to pull the next pair from this shard
+		}
 
-		// 1. Initialize: Open an iterator for every shard and grab the first item
+		// The heap is keyed by K (priority) and stores our shardCursor
+		h := heap.New[shardCursor, K]()
+
+		// 1. INITIALIZATION PHASE
+		// Open pull iterators for all 256 shards and grab the first item from each.
 		for i := 0; i < shardCount; i++ {
 			s := m.shards[i]
+
 			s.RLock()
-			// We need to keep the lock or a snapshot?
-			// For a simple implementation, we'll collect the shard's iterator.
-			next, stop := iter.Pull2(s.data.All())
+			// Create a pull iterator from the shard's push iterator.
+			// This captures a point-in-time view of the shard's B-Tree.
+			pull, stop := iter.Pull2(s.data.All())
+
+			// Crucial: stop() must be called to release B-Tree resources.
+			// These defers will execute when the All() function returns.
 			defer stop()
 
-			if k, v, ok := next(); ok {
-				heap.Push(h, shardItem[K, V]{k: k, v: v, next: next})
+			if k, v, ok := pull(); ok {
+				// We push the first key as the priority, and the rest in the cursor.
+				h.Push(shardCursor{curr: v, next: pull}, k)
 			}
 			s.RUnlock()
 		}
 
-		// 2. Merge: Always pull the smallest key from the heap
+		// 2. MERGE PHASE
+		// Always pop the globally smallest key across all 256 shards.
 		for h.Len() > 0 {
-			item := heap.Pop(h).(shardItem[K, V])
+			// k: the priority (key)
+			// cursor: the struct containing the current value and the puller
+			k, cursor, _ := h.Pop()
 
-			// Yield the smallest current value to the user
-			if !yield(item.k, item.v) {
+			// Yield the smallest current pair to the user's for-range loop.
+			// If yield returns false, the user has 'broken' out of the loop.
+			if !yield(k, cursor.curr) {
 				return
 			}
 
-			// Pull the next item from the SAME shard that just produced a value
-			if k, v, ok := item.next(); ok {
-				heap.Push(h, shardItem[K, V]{k: k, v: v, next: item.next})
+			// Refill: Get the next item from the shard that just provided 'k'.
+			if nextK, nextV, ok := cursor.next(); ok {
+				// Update the cursor with the NEW value we just pulled...
+				cursor.curr = nextV
+
+				// ...and push it back into the heap with its NEW key as priority.
+				h.Push(cursor, nextK)
 			}
+			// If !ok, the shard is exhausted and we simply don't push it back.
 		}
 	}
 }
