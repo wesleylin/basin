@@ -27,8 +27,8 @@ func NewMax[P cmp.Ordered, T any]() *Heap[P, T] {
 
 func (h *Heap[P, T]) Len() int { return len(h.data) }
 
-// Insert adds a value with the given priority to the heap and restores the heap invariant.
-func (h *Heap[P, T]) Insert(val T, priority P) {
+// Insert adds a value wisth the given priority to the heap and restores the heap invariant.
+func (h *Heap[P, T]) Insert(priority P, val T) {
 	h.data = append(h.data, entry[P, T]{val, priority})
 	h.up(len(h.data) - 1)
 }
@@ -36,9 +36,9 @@ func (h *Heap[P, T]) Insert(val T, priority P) {
 // Replace is a slightly faster way of doing a Pop() then immediate an Insert(T, P).
 // Specifically a high-performance path for doing K-Way merges.
 // It overwrites the root and bubbles it down, saving an 'up' pass.
-func (h *Heap[P, T]) Replace(val T, priority P) {
+func (h *Heap[P, T]) Replace(priority P, val T) {
 	if len(h.data) == 0 {
-		h.Insert(val, priority)
+		h.Insert(priority, val)
 		return
 	}
 	h.data[0] = entry[P, T]{val, priority}

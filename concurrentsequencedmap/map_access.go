@@ -46,11 +46,11 @@ func (m *Map[K, V]) All() iter.Seq2[K, V] {
 			s.RUnlock()
 
 			if ok {
-				h.Insert(mergeRef{
+				h.Insert(e.seq, mergeRef{
 					key:      k,
 					value:    e.value,
 					shardIdx: i,
-				}, e.seq)
+				})
 			}
 		}
 
@@ -77,11 +77,11 @@ func (m *Map[K, V]) All() iter.Seq2[K, V] {
 			s.RUnlock()
 
 			if ok {
-				h.Replace(mergeRef{
+				h.Replace(nextE.seq, mergeRef{
 					key:      nextK,
 					value:    nextE.value,
 					shardIdx: idx,
-				}, nextE.seq)
+				})
 			} else {
 				// shard exhausted
 				h.Pop()
