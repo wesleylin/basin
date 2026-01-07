@@ -116,5 +116,5 @@ func (m *Map[K, V]) Values() iter.Seq[V] {
 // Stream returns a new Stream initialized with the globally ordered data from this map.
 func (m *Map[K, V]) Stream2() stream.Stream2[K, V] {
 	// We pass the global iterator directly into the stream constructor
-	return stream.New2(m.All(), nil /*no error passed */)
+	return stream.FromSeq2(m.All())
 }
