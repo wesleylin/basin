@@ -64,6 +64,22 @@ func TestMap_OverwriteMaintainsSequence(t *testing.T) {
 	}
 }
 
+func TestMap_StrictOrder(t *testing.T) {
+	m := New[string, string]()
+	m.Put("first", "A")
+	m.Put("second", "B")
+	m.Put("third", "C")
+
+	expected := []string{"A", "B", "C"}
+	i := 0
+	for _, val := range m.All() {
+		if val != expected[i] {
+			t.Errorf("Order mismatch at index %d: expected %s, got %s", i, expected[i], val)
+		}
+		i++
+	}
+}
+
 // Helper to peek at the internal sequence for testing
 func getSeq[K comparable, V any](m *Map[K, V], key K) uint64 {
 	shard := m.getShard(key)
