@@ -58,7 +58,7 @@ func (m *Map[K, V]) All() iter.Seq2[K, V] {
 		// We always pull the item with the lowest sequence ID across all shards.
 		for h.Len() > 0 {
 			// 1. Get the globally earliest item.
-			item, _, _ := h.Peek()
+			_, item, _ := h.Peek()
 
 			// 2. Yield to the user.
 			// No locks are held here, allowing the user to process data
