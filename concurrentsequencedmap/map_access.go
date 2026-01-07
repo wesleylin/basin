@@ -9,33 +9,6 @@ import (
 	"github.com/wesleylin/basin/stream"
 )
 
-// mergeItem tracks the current head of one specific shard's iterator.
-type mergeItem[K comparable, V any] struct {
-	key      K
-	entry    globalEntry[V]
-	shardIdx int
-}
-
-// mergeHeap implements heap.Interface to provide an O(log N) min-priority queue
-// based on the global sequence ID.
-type mergeHeap[K comparable, V any] []mergeItem[K, V]
-
-func (h mergeHeap[K, V]) Len() int           { return len(h) }
-func (h mergeHeap[K, V]) Less(i, j int) bool { return h[i].entry.seq < h[j].entry.seq }
-func (h mergeHeap[K, V]) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
-
-func (h *mergeHeap[K, V]) Push(x any) {
-	*h = append(*h, x.(mergeItem[K, V]))
-}
-
-func (h *mergeHeap[K, V]) Pop() any {
-	old := *h
-	n := len(old)
-	x := old[n-1]
-	*h = old[0 : n-1]
-	return x
-}
-
 // All returns a Go 1.23 iterator that yields all key-value pairs in the
 // map according to their global insertion order.
 // Uses a small heap-Merge with micro-locks, guaranteed to be in order for the items
