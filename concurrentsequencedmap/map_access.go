@@ -1,8 +1,10 @@
 package concurrentsequencedmap
 
 import (
-	"container/heap"
+	// "container/heap"
 	"iter"
+
+	"github.com/wesleylin/basin/heap"
 
 	"github.com/wesleylin/basin/stream"
 )
@@ -40,8 +42,14 @@ func (h *mergeHeap[K, V]) Pop() any {
 // that existed when All() was called
 func (m *Map[K, V]) All() iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
-		h := &mergeHeap[K, V]{}
-		heap.Init(h)
+		// Define a local struct for the heap values
+		type mergeRef struct {
+			key      K
+			value    V
+			shardIdx int
+		}
+
+		h := heap.New[mergeRef, uint64]()
 
 		// Create pull iterators for all 256 shards.
 		// iter.Pull2 starts a background goroutine for each shard.
@@ -65,11 +73,11 @@ func (m *Map[K, V]) All() iter.Seq2[K, V] {
 			s.RUnlock()
 
 			if ok {
-				heap.Push(h, mergeItem[K, V]{
+				h.Insert(mergeRef{
 					key:      k,
-					entry:    e,
+					value:    e.value,
 					shardIdx: i,
-				})
+				}, e.seq)
 			}
 		}
 
@@ -77,12 +85,12 @@ func (m *Map[K, V]) All() iter.Seq2[K, V] {
 		// We always pull the item with the lowest sequence ID across all shards.
 		for h.Len() > 0 {
 			// 1. Get the globally earliest item.
-			item := heap.Pop(h).(mergeItem[K, V])
+			item, _, _ := h.Peek()
 
 			// 2. Yield to the user.
 			// No locks are held here, allowing the user to process data
 			// without blocking map writes.
-			if !yield(item.key, item.entry.value) {
+			if !yield(item.key, item.value) {
 				return
 			}
 
@@ -96,11 +104,14 @@ func (m *Map[K, V]) All() iter.Seq2[K, V] {
 			s.RUnlock()
 
 			if ok {
-				heap.Push(h, mergeItem[K, V]{
+				h.Replace(mergeRef{
 					key:      nextK,
-					entry:    nextE,
+					value:    nextE.value,
 					shardIdx: idx,
-				})
+				}, nextE.seq)
+			} else {
+				// shard exhausted
+				h.Pop()
 			}
 		}
 	}

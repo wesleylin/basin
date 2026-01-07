@@ -33,7 +33,8 @@ func (h *Heap[T, P]) Insert(val T, priority P) {
 	h.up(len(h.data) - 1)
 }
 
-// Replace is the high-performance path for K-Way merges.
+// Replace is a slightly faster way of doing a Pop() then immediate an Insert(T, P).
+// Specifically a high-performance path for doing K-Way merges.
 // It overwrites the root and bubbles it down, saving an 'up' pass.
 func (h *Heap[T, P]) Replace(val T, priority P) {
 	if len(h.data) == 0 {
