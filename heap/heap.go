@@ -21,7 +21,7 @@ func New[P cmp.Ordered, T any]() *Heap[T, P] {
 }
 
 // NewMax returns a Max-Heap (largest priority at the top)
-func NewMax[T any, P cmp.Ordered]() *Heap[T, P] {
+func NewMax[P cmp.Ordered, T any]() *Heap[T, P] {
 	return &Heap[T, P]{min: false}
 }
 

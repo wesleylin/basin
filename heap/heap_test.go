@@ -28,7 +28,7 @@ func TestHeapBasic(t *testing.T) {
 }
 
 func TestMaxHeap(t *testing.T) {
-	h := NewMax[string, int]()
+	h := NewMax[int, string]()
 
 	h.Insert("low", 1)
 	h.Insert("high", 10)
