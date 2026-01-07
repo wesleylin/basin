@@ -51,3 +51,33 @@ func TestMap_KeysAndValues(t *testing.T) {
 		}
 	})
 }
+
+func TestMap_All(t *testing.T) {
+	// 1. Storage Layer
+	m := concurrentsequencedmap.New[string, int]()
+	m.Put("A", 1)
+	m.Put("B", 2)
+	m.Put("C", 3)
+	m.Put("D", 4)
+
+	// 2. Integration Layer (Map -> Stream)
+	// This triggers the 256-way Heap Merge under the hood
+	results, err := m.Stream2().
+		Filter(func(k string, v int) bool {
+			return v%2 == 0 // Keep even numbers (B and D)
+		}).
+		Collect()
+
+	if err != nil {
+		t.Fatalf("Streaming failed: %v", err)
+	}
+
+	// 3. Verification
+	if len(results) != 2 {
+		t.Errorf("Expected 2 results, got %d", len(results))
+	}
+
+	if results[0].Key != "B" || results[1].Key != "D" {
+		t.Errorf("Order or filtering failed. Got: %v", results)
+	}
+}
