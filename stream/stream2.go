@@ -30,6 +30,12 @@ func New2[K, V any](seq iter.Seq2[K, V], errPtr *error) Stream2[K, V] {
 	}
 }
 
+func FromSeq2[K, V any](seq iter.Seq2[K, V]) Stream2[K, V] {
+	// err is instantiated here
+	var err error
+	return Stream2[K, V]{seq: seq, err: &err}
+}
+
 // FromMap creates a Stream2 from a standard Go map.
 func FromMap[K comparable, V any](m map[K]V) Stream2[K, V] {
 	var err error

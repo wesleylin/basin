@@ -27,6 +27,17 @@ func New[T any](seq iter.Seq[T], errPtr *error) Stream[T] {
 	}
 }
 
+func FromSeq[T any](seq iter.Seq[T]) Stream[T] {
+	// err is instantiated here
+	var err error
+	return Stream[T]{seq: seq, err: &err}
+}
+
+// Seq returns the raw Go 1.23 iterator for use in for-range loops.
+func (s Stream[T]) Seq() iter.Seq[T] {
+	return s.seq
+}
+
 // FromSlice creates a Stream from a standard Go slice.
 // Since slices are in-memory, the error pointer will stay nil
 // unless a later operation (like MapErr) trips it.
@@ -170,17 +181,6 @@ func (s Stream[T]) Collect() ([]T, error) {
 	}
 
 	return items, nil
-}
-
-// Seq returns the raw Go 1.23 iterator for use in for-range loops.
-func (s Stream[T]) Seq() iter.Seq[T] {
-	return s.seq
-}
-
-func FromSeq[T any](seq iter.Seq[T]) Stream[T] {
-	// err is instantiated here
-	var err error
-	return Stream[T]{seq: seq, err: &err}
 }
 
 // check is a private helper to keep things DRY
