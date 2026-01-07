@@ -10,8 +10,8 @@ func TestSortedMap(t *testing.T) {
 
 	// 1. Test Set and Get
 	t.Run("SetAndGet", func(t *testing.T) {
-		sm.Set("apple", 10)
-		sm.Set("banana", 20)
+		sm.Put("apple", 10)
+		sm.Put("banana", 20)
 
 		val, ok := sm.Get("apple")
 		if !ok || val != 10 {
@@ -21,7 +21,7 @@ func TestSortedMap(t *testing.T) {
 
 	// 2. Test Overwrite
 	t.Run("Overwrite", func(t *testing.T) {
-		sm.Set("apple", 15)
+		sm.Put("apple", 15)
 		val, _ := sm.Get("apple")
 		if val != 15 {
 			t.Errorf("expected overwritten value 15, got %d", val)
@@ -43,7 +43,7 @@ func TestSortedMap(t *testing.T) {
 		sm = New[string, int]()
 		data := map[string]int{"c": 3, "a": 1, "b": 2}
 		for k, v := range data {
-			sm.Set(k, v)
+			sm.Put(k, v)
 		}
 
 		expectedOrder := []string{"a", "b", "c"}
@@ -64,7 +64,7 @@ func TestSortedMap(t *testing.T) {
 	t.Run("RangeScan", func(t *testing.T) {
 		sm = New[string, int]()
 		for i := 0; i < 10; i++ {
-			sm.Set(fmt.Sprintf("key-%02d", i), i)
+			sm.Put(fmt.Sprintf("key-%02d", i), i)
 		}
 
 		// Scan from key-03 to key-06 (exclusive of end)

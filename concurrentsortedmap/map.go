@@ -55,7 +55,7 @@ func (m *Map[K, V]) Get(key K) (V, bool) {
 func (s *shard[K, V]) Set(key K, value V) {
 	s.Lock()
 	defer s.Unlock()
-	s.data.Set(key, value)
+	s.data.Put(key, value)
 }
 
 // Even Get needs a pointer receiver because it uses PathHints (which change)
