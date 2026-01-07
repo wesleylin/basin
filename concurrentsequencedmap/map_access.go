@@ -36,6 +36,8 @@ func (h *mergeHeap[K, V]) Pop() any {
 
 // All returns a Go 1.23 iterator that yields all key-value pairs in the
 // map according to their global insertion order.
+// Uses a small heap-Merge with micro-locks, guaranteed to be in order for the items
+// that existed when All() was called
 func (m *Map[K, V]) All() iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
 		h := &mergeHeap[K, V]{}
