@@ -77,3 +77,33 @@ func TestMap_Concurrency(t *testing.T) {
 	}
 	wg.Wait()
 }
+
+func TestMap_Override(t *testing.T) {
+	m := New[string, string]()
+
+	key := "basin-config"
+	initialVal := "v1"
+	updatedVal := "v2"
+
+	// 1. First Put should return 'false' (it's a new insert, not a replacement)
+	replaced := m.Put(key, initialVal)
+	if replaced {
+		t.Errorf("First Put should return false, got true")
+	}
+
+	// Verify the value is there
+	if v, _ := m.Get(key); v != initialVal {
+		t.Errorf("Expected %s, got %s", initialVal, v)
+	}
+
+	// 2. Second Put to the same key should return 'true' (it's an update)
+	replaced = m.Put(key, updatedVal)
+	if !replaced {
+		t.Errorf("Second Put to existing key should return true, got false")
+	}
+
+	// 3. Verify the value was actually updated
+	if v, _ := m.Get(key); v != updatedVal {
+		t.Errorf("Expected %s, got %s", updatedVal, v)
+	}
+}
