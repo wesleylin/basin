@@ -88,3 +88,63 @@ func TestEmptyHeap(t *testing.T) {
 		t.Error("Pop on empty heap should return ok=false")
 	}
 }
+
+func TestHeapReplace(t *testing.T) {
+	h := New[string, int]()
+	h.Insert("medium", 50)
+	h.Insert("low", 100)
+	h.Insert("high", 10)
+
+	// Replace "high" (10) with "ultra-low" (200)
+	// The root was 10, now the new root should be 50
+	h.Replace("ultra-low", 200)
+
+	val, _ := h.Pop()
+	if val != "medium" {
+		t.Errorf("Expected medium (50) after replace, got %s", val)
+	}
+
+	val, _ = h.Pop()
+	if val != "low" {
+		t.Errorf("Expected low (100), got %s", val)
+	}
+
+	val, _ = h.Pop()
+	if val != "ultra-low" {
+		t.Errorf("Expected ultra-low (200), got %s", val)
+	}
+}
+
+func TestHeapFix(t *testing.T) {
+	h := New[string, int]()
+	h.Insert("A", 10)
+	h.Insert("B", 20)
+	h.Insert("C", 30)
+
+	// Manually sabotage the priority of the root (A)
+	h.data[0].priority = 40
+	// Fix it
+	h.Fix(0)
+
+	// New root should be B (20)
+	val, _ := h.Pop()
+	if val != "B" {
+		t.Errorf("After Fix, expected B at root, got %s", val)
+	}
+}
+
+func TestHeapMemorySafety(t *testing.T) {
+	type complexObj struct {
+		data []byte
+	}
+	h := New[*complexObj, int]()
+	obj := &complexObj{data: make([]byte, 1024)}
+
+	h.Insert(obj, 10)
+	h.Pop()
+
+	// Check if the underlying slice cleared the reference
+	if h.data[:1][0].value != nil {
+		t.Error("Pop did not zero out the underlying array element; potential memory leak")
+	}
+}
