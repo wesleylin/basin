@@ -6,7 +6,7 @@ import (
 )
 
 func TestHeapBasic(t *testing.T) {
-	h := New[string, int]() // Min-Heap
+	h := New[int, string]() // Min-Heap
 
 	h.Insert("low", 10)
 	h.Insert("high", 1)
@@ -64,7 +64,7 @@ func TestHeapDrain(t *testing.T) {
 
 func TestUnstableNature(t *testing.T) {
 	// This test documents that we do NOT guarantee order for equal priorities
-	h := New[string, int]()
+	h := New[int, string]()
 
 	// Adding three items with the same priority
 	h.Insert("A", 1)
@@ -90,7 +90,7 @@ func TestEmptyHeap(t *testing.T) {
 }
 
 func TestHeapReplace(t *testing.T) {
-	h := New[string, int]()
+	h := New[int, string]()
 	h.Insert("medium", 50)
 	h.Insert("low", 100)
 	h.Insert("high", 10)
@@ -116,7 +116,7 @@ func TestHeapReplace(t *testing.T) {
 }
 
 func TestHeapFix(t *testing.T) {
-	h := New[string, int]()
+	h := New[int, string]()
 	h.Insert("A", 10)
 	h.Insert("B", 20)
 	h.Insert("C", 30)
@@ -137,7 +137,7 @@ func TestHeapMemorySafety(t *testing.T) {
 	type complexObj struct {
 		data []byte
 	}
-	h := New[*complexObj, int]()
+	h := New[int, *complexObj]()
 	obj := &complexObj{data: make([]byte, 1024)}
 
 	h.Insert(obj, 10)

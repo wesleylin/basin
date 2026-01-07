@@ -22,7 +22,7 @@ func (m *Map[K, V]) All() iter.Seq2[K, V] {
 			shardIdx int
 		}
 
-		h := heap.New[mergeRef, uint64]()
+		h := heap.New[uint64, mergeRef]()
 
 		// Create pull iterators for all 256 shards.
 		// iter.Pull2 starts a background goroutine for each shard.

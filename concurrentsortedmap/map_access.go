@@ -16,7 +16,7 @@ func (m *Map[K, V]) All() iter.Seq2[K, V] {
 		}
 
 		// The heap is keyed by K (priority) and stores our shardCursor
-		h := heap.New[shardCursor, K]()
+		h := heap.New[K, shardCursor]()
 
 		// 1. INITIALIZATION PHASE
 		// Open pull iterators for all 256 shards and grab the first item from each.

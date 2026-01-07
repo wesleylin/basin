@@ -16,7 +16,7 @@ type Heap[T any, P cmp.Ordered] struct {
 }
 
 // New returns a Min-Heap (smallest priority at the top)
-func New[T any, P cmp.Ordered]() *Heap[T, P] {
+func New[P cmp.Ordered, T any]() *Heap[T, P] {
 	return &Heap[T, P]{min: true}
 }
 
