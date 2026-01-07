@@ -29,9 +29,10 @@ func New[K cmp.Ordered, V any]() *SortedMap[K, V] {
 }
 
 // Set inserts or updates a key-value pair.
-func (m *SortedMap[K, V]) Put(key K, value V) {
+func (m *SortedMap[K, V]) Put(key K, value V) (V, bool) {
 	// Using SetHint makes sequential writes significantly faster.
-	m.tree.SetHint(kv[K, V]{key, value}, &m.hint)
+	prev, replaced := m.tree.SetHint(kv[K, V]{key, value}, &m.hint)
+	return prev.value, replaced
 }
 
 // Get retrieves a value. Returns the zero value and false if not found.

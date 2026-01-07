@@ -51,16 +51,21 @@ func (m *Map[K, V]) Get(key K) (V, bool) {
 	return res, ok
 }
 
-// shard has a pointer receiver because it must lock the mutex
-func (s *shard[K, V]) Set(key K, value V) {
+// Put inserts or updates a value
+func (m *Map[K, V]) Put(key K, value V) bool {
+	s := m.getShard(key)
 	s.Lock()
 	defer s.Unlock()
-	s.data.Put(key, value)
+
+	_, ok := s.data.Put(key, value)
+	return ok
 }
 
-// Even Get needs a pointer receiver because it uses PathHints (which change)
-func (s *shard[K, V]) Get(key K) (V, bool) {
-	s.RLock()
-	defer s.RUnlock()
-	return s.data.Get(key)
+// Delete removes a key while maintaining thread safety.
+func (m *Map[K, V]) Delete(key K) {
+	s := m.getShard(key)
+	s.Lock()
+	defer s.Unlock()
+
+	s.data.Delete(key)
 }
