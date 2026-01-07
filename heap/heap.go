@@ -5,48 +5,48 @@ import (
 	"iter"
 )
 
-type entry[T any, P cmp.Ordered] struct {
+type entry[P cmp.Ordered, T any] struct {
 	value    T
 	priority P
 }
 
-type Heap[T any, P cmp.Ordered] struct {
-	data []entry[T, P]
+type Heap[P cmp.Ordered, T any] struct {
+	data []entry[P, T]
 	min  bool
 }
 
 // New returns a Min-Heap (smallest priority at the top)
-func New[P cmp.Ordered, T any]() *Heap[T, P] {
-	return &Heap[T, P]{min: true}
+func New[P cmp.Ordered, T any]() *Heap[P, T] {
+	return &Heap[P, T]{min: true}
 }
 
 // NewMax returns a Max-Heap (largest priority at the top)
-func NewMax[P cmp.Ordered, T any]() *Heap[T, P] {
-	return &Heap[T, P]{min: false}
+func NewMax[P cmp.Ordered, T any]() *Heap[P, T] {
+	return &Heap[P, T]{min: false}
 }
 
-func (h *Heap[T, P]) Len() int { return len(h.data) }
+func (h *Heap[P, T]) Len() int { return len(h.data) }
 
 // Insert adds a value with the given priority to the heap and restores the heap invariant.
-func (h *Heap[T, P]) Insert(val T, priority P) {
-	h.data = append(h.data, entry[T, P]{val, priority})
+func (h *Heap[P, T]) Insert(val T, priority P) {
+	h.data = append(h.data, entry[P, T]{val, priority})
 	h.up(len(h.data) - 1)
 }
 
 // Replace is a slightly faster way of doing a Pop() then immediate an Insert(T, P).
 // Specifically a high-performance path for doing K-Way merges.
 // It overwrites the root and bubbles it down, saving an 'up' pass.
-func (h *Heap[T, P]) Replace(val T, priority P) {
+func (h *Heap[P, T]) Replace(val T, priority P) {
 	if len(h.data) == 0 {
 		h.Insert(val, priority)
 		return
 	}
-	h.data[0] = entry[T, P]{val, priority}
+	h.data[0] = entry[P, T]{val, priority}
 	h.down(0, len(h.data))
 }
 
 // Fix re-establishes heap order after an element at index i has changed its priority.
-func (h *Heap[T, P]) Fix(i int) {
+func (h *Heap[P, T]) Fix(i int) {
 	if i < 0 || i >= len(h.data) {
 		return
 	}
@@ -55,7 +55,7 @@ func (h *Heap[T, P]) Fix(i int) {
 	}
 }
 
-func (h *Heap[T, P]) Pop() (P, T, bool) {
+func (h *Heap[P, T]) Pop() (P, T, bool) {
 	if len(h.data) == 0 {
 		var zeroP P
 		var zeroT T
@@ -71,13 +71,13 @@ func (h *Heap[T, P]) Pop() (P, T, bool) {
 	// Memory Safety: Zero out the slot to prevent stale pointer leaks
 	var zero T
 	var zeroP P
-	h.data[n] = entry[T, P]{zero, zeroP}
+	h.data[n] = entry[P, T]{zero, zeroP}
 
 	h.data = h.data[:n]
 	return item.priority, item.value, true
 }
 
-func (h *Heap[T, P]) Peek() (T, P, bool) {
+func (h *Heap[P, T]) Peek() (T, P, bool) {
 	if len(h.data) == 0 {
 		var zero T
 		var zeroP P
@@ -88,7 +88,7 @@ func (h *Heap[T, P]) Peek() (T, P, bool) {
 
 // Drain removes and yields all elements from the heap in priority order.
 // Usage: for v := range h.Drain() { ... } will pop all elements.
-func (h *Heap[T, P]) Drain() iter.Seq[T] {
+func (h *Heap[P, T]) Drain() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for {
 			_, val, ok := h.Pop()
@@ -101,7 +101,7 @@ func (h *Heap[T, P]) Drain() iter.Seq[T] {
 
 // --- Internal Heap Math ---
 
-func (h *Heap[T, P]) up(j int) {
+func (h *Heap[P, T]) up(j int) {
 	for {
 		i := (j - 1) / 2 // parent
 		if i == j || !h.less(j, i) {
@@ -112,7 +112,7 @@ func (h *Heap[T, P]) up(j int) {
 	}
 }
 
-func (h *Heap[T, P]) down(i0, n int) bool {
+func (h *Heap[P, T]) down(i0, n int) bool {
 	i := i0
 	for {
 		j1 := 2*i + 1
@@ -132,13 +132,13 @@ func (h *Heap[T, P]) down(i0, n int) bool {
 	return i > i0
 }
 
-func (h *Heap[T, P]) less(i, j int) bool {
+func (h *Heap[P, T]) less(i, j int) bool {
 	if h.min {
 		return h.data[i].priority < h.data[j].priority
 	}
 	return h.data[i].priority > h.data[j].priority
 }
 
-func (h *Heap[T, P]) swap(i, j int) {
+func (h *Heap[P, T]) swap(i, j int) {
 	h.data[i], h.data[j] = h.data[j], h.data[i]
 }

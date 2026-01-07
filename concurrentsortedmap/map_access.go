@@ -34,7 +34,7 @@ func (m *Map[K, V]) All() iter.Seq2[K, V] {
 
 			if k, v, ok := pull(); ok {
 				// We push the first key as the priority, and the rest in the cursor.
-				h.Push(shardCursor{curr: v, next: pull}, k)
+				h.Push(k, shardCursor{curr: v, next: pull})
 			}
 			s.RUnlock()
 		}
@@ -58,7 +58,7 @@ func (m *Map[K, V]) All() iter.Seq2[K, V] {
 				cursor.curr = nextV
 
 				// ...and push it back into the heap with its NEW key as priority.
-				h.Push(cursor, nextK)
+				h.Push(nextK, cursor)
 			}
 			// If !ok, the shard is exhausted and we simply don't push it back.
 		}
