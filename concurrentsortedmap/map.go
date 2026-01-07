@@ -20,7 +20,7 @@ type Map[K cmp.Ordered, V any] struct {
 type shard[K cmp.Ordered, V any] struct {
 	// We embed a RWMutex so each shard can be locked independently
 	sync.RWMutex
-	data sortedmap.SortedMap[K, V]
+	data sortedmap.Map[K, V]
 }
 
 func New[K cmp.Ordered, V any]() *Map[K, V] {
