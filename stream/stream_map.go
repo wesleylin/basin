@@ -22,6 +22,7 @@ func MapErr[T any](s Stream[T], fn func(T) (T, error)) Stream[T] {
 			for v := range s.seq {
 				mapped, err := fn(v)
 				if err != nil {
+					// if err is found, set err as return value and terminate
 					*s.err = err
 					return
 				}
