@@ -56,3 +56,18 @@ func FlatMap[T, R any](s Stream[T], fn func(T) iter.Seq[R]) Stream[R] {
 		},
 	}
 }
+
+// Fold collapses a Stream[T] into a single value of type U.
+// It requires an initial value (the "seed") and a function to accumulate results.
+func Fold[T any, U any](s Stream[T], initial U, fn func(U, T) U) (U, error) {
+	acc := initial
+	for v := range s.seq {
+		// Check for upstream errors before each step
+		if s.err != nil && *s.err != nil {
+			return initial, *s.err
+		}
+		acc = fn(acc, v)
+	}
+	// Final check for errors that might have occurred at the very end of the sequence
+	return acc, s.check()
+}

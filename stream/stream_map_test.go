@@ -83,3 +83,69 @@ func TestMapFunctions(t *testing.T) {
 		}
 	})
 }
+
+func TestFold(t *testing.T) {
+	t.Run("Sum Lengths of Strings", func(t *testing.T) {
+		// Stream of strings -> reduced to an int (total characters)
+		s := FromSlice([]string{"apple", "pear", "kiwi"})
+
+		// Fold(stream, initialValue, accumulator)
+		totalLen, err := Fold(s, 0, func(acc int, s string) int {
+			return acc + len(s)
+		})
+
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if totalLen != 13 { // 5 + 4 + 4
+			t.Errorf("expected 13, got %d", totalLen)
+		}
+	})
+
+	t.Run("Build a Map from Stream", func(t *testing.T) {
+		// This is a common pattern for "collecting" data into a lookup table
+		type User struct {
+			ID   int
+			Name string
+		}
+		users := []User{{1, "Alice"}, {2, "Bob"}}
+		s := FromSlice(users)
+
+		userMap, err := Fold(s, make(map[int]string), func(acc map[int]string, u User) map[int]string {
+			acc[u.ID] = u.Name
+			return acc
+		})
+
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if userMap[1] != "Alice" || userMap[2] != "Bob" {
+			t.Errorf("map was not built correctly: %v", userMap)
+		}
+	})
+
+	t.Run("Fold with Upstream Error", func(t *testing.T) {
+		var errSource = fmt.Errorf("connection lost")
+		s := New(func(yield func(int) bool) {
+			if !yield(1) {
+				return
+			}
+			if !yield(2) {
+				return
+			}
+		}, &errSource)
+
+		// The fold should return the initial value and the error
+		result, err := Fold(s, 100, func(acc int, v int) int {
+			return acc + v
+		})
+
+		if err != errSource {
+			t.Errorf("expected %v, got %v", errSource, err)
+		}
+		// In an error scenario, we return the seed value
+		if result != 100 {
+			t.Errorf("expected seed 100, got %d", result)
+		}
+	})
+}
