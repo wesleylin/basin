@@ -1,6 +1,7 @@
 package stream
 
 import (
+	"fmt"
 	"iter"
 )
 
@@ -173,6 +174,37 @@ func (s Stream2[K, V]) Count() (int, error) {
 		return 0, *s.err
 	}
 	return n, nil
+}
+
+// Reduce collapses the Stream2 into a single [K, V] pair.
+// It uses the first pair as the initial accumulator.
+func (s Stream2[K, V]) Reduce(fn func(k1 K, v1 V, k2 K, v2 V) (K, V)) (K, V, error) {
+	var accK K
+	var accV V
+	var first = true
+
+	for k, v := range s.seq {
+		// Respect the shared error pointer from the source or MapErr
+		if s.err != nil && *s.err != nil {
+			return accK, accV, *s.err
+		}
+
+		if first {
+			accK = k
+			accV = v
+			first = false
+			continue
+		}
+
+		// Combine the current accumulator with the next pair
+		accK, accV = fn(accK, accV, k, v)
+	}
+
+	if first {
+		return accK, accV, fmt.Errorf("cannot reduce empty stream")
+	}
+
+	return accK, accV, nil
 }
 
 // check is a private helper to keep things DRY
