@@ -209,3 +209,46 @@ func TestCount(t *testing.T) {
 		}
 	})
 }
+
+func TestStream_ForEach(t *testing.T) {
+	t.Run("Successful Iteration", func(t *testing.T) {
+		var result []int
+		s := FromSlice([]int{1, 2, 3, 4, 5})
+
+		err := s.ForEach(func(v int) {
+			result = append(result, v)
+		})
+
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+		if len(result) != 5 || result[4] != 5 {
+			t.Errorf("unexpected result: %v", result)
+		}
+	})
+
+	t.Run("Error Termination", func(t *testing.T) {
+		// We simulate an error being tripped mid-stream
+		var errSource error
+		seq := func(yield func(int) bool) {
+			yield(1)
+			yield(2)
+			errSource = fmt.Errorf("shard failure") // Trip the error
+			yield(3)                                // ForEach should see the error before processing this
+		}
+
+		s := New(seq, &errSource)
+		count := 0
+		err := s.ForEach(func(v int) {
+			count++
+		})
+
+		if err == nil || err.Error() != "shard failure" {
+			t.Errorf("expected shard failure error, got %v", err)
+		}
+		// Should have processed 1 and 2, but stopped before 3
+		if count != 2 {
+			t.Errorf("expected count 2, got %d", count)
+		}
+	})
+}

@@ -1,6 +1,7 @@
 package stream
 
 import (
+	"fmt"
 	"iter"
 	"slices"
 )
@@ -181,6 +182,39 @@ func (s Stream[T]) Collect() ([]T, error) {
 	}
 
 	return items, nil
+}
+
+func (s Stream[T]) ForEach(fn func(T)) error {
+	for v := range s.seq {
+		// If an error was tripped by a previous MapErr or the source
+		if s.err != nil && *s.err != nil {
+			return *s.err
+		}
+		fn(v)
+	}
+	return s.check()
+}
+
+func (s Stream[T]) Reduce(fn func(T, T) T) (T, error) {
+	var acc T
+	var first = true
+
+	for v := range s.seq {
+		if s.err != nil && *s.err != nil {
+			return acc, *s.err
+		}
+		if first {
+			acc = v
+			first = false
+			continue
+		}
+		acc = fn(acc, v)
+	}
+
+	if first {
+		return acc, fmt.Errorf("cannot reduce empty stream")
+	}
+	return acc, nil
 }
 
 // check is a private helper to keep things DRY
