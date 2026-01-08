@@ -252,3 +252,52 @@ func TestStream_ForEach(t *testing.T) {
 		}
 	})
 }
+
+func TestStream_Reduce(t *testing.T) {
+	t.Run("Summation", func(t *testing.T) {
+		s := FromSlice([]int{1, 2, 3, 4, 5})
+		sum, err := s.Reduce(func(a, b int) int {
+			return a + b
+		})
+
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if sum != 15 {
+			t.Errorf("expected 15, got %d", sum)
+		}
+	})
+
+	t.Run("String Concatenation", func(t *testing.T) {
+		s := FromSlice([]string{"a", "b", "c"})
+		result, _ := s.Reduce(func(a, b string) string {
+			return a + "," + b
+		})
+
+		if result != "a,b,c" {
+			t.Errorf("expected a,b,c, got %s", result)
+		}
+	})
+
+	t.Run("Empty Stream Error", func(t *testing.T) {
+		s := FromSlice([]int{}) // Empty
+		_, err := s.Reduce(func(a, b int) int { return a + b })
+
+		if err == nil || err.Error() != "cannot reduce empty stream" {
+			t.Errorf("expected empty stream error, got %v", err)
+		}
+	})
+
+	t.Run("Error Propagation", func(t *testing.T) {
+		var errSource = fmt.Errorf("critical failure")
+		// A stream that starts with an error already present
+		s := New(func(yield func(int) bool) {
+			yield(1)
+		}, &errSource)
+
+		_, err := s.Reduce(func(a, b int) int { return a + b })
+		if err != errSource {
+			t.Errorf("expected %v, got %v", errSource, err)
+		}
+	})
+}
