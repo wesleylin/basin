@@ -11,6 +11,11 @@ type Stream[T any] struct {
 	err *error
 }
 
+type Entry[K, V any] struct {
+	Key   K
+	Value V
+}
+
 // constructors
 
 // New wraps a standard Go 1.23 iterator into a Basin Stream.
